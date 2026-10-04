@@ -1,0 +1,64 @@
+{
+  "mixtapes": [
+    {
+      "title": "mix by anvitha",
+      "displayTitle": "Mixed by Anvitha",
+      "date": null,
+      "dateLabel": "OCTOBER 2026",
+      "dateSource": "Month and year supplied by the user",
+      "url": "https://open.spotify.com/playlist/6VWaYZbC9La3vbG2qIywXq",
+      "embed": true,
+      "cover": "assets/mixtapes/cover-8077-torn.png",
+      "tracks": [
+        {
+          "title": "Little Bit",
+          "artist": "Erika de Casier",
+          "uri": "spotify:track:0spXmYRCgO10zVvQwkj4hZ",
+          "durationMs": 286000,
+          "explicit": false
+        },
+        {
+          "title": "Bound",
+          "artist": "Wet, Blood Orange",
+          "uri": "spotify:track:0CsLshwxsSHYq3m6gLw3Uo",
+          "durationMs": 220332,
+          "explicit": false
+        },
+        {
+          "title": "Talk 2 Me",
+          "artist": "54 Ultra",
+          "uri": "spotify:track:7wfOwy1NErjzBYRf1HnDPb",
+          "durationMs": 186624,
+          "explicit": false
+        },
+        {
+          "title": "am i not enough for now?",
+          "artist": "MARO",
+          "uri": "spotify:track:04xC7XwAsCqF3HOEFemLcz",
+          "durationMs": 232038,
+          "explicit": false
+        },
+        {
+          "title": "You're in Love",
+          "artist": "ESPRIT 空想, George Clanton",
+          "uri": "spotify:track:0oIOd9iLRBAwmSsJrfnZ77",
+          "durationMs": 337000,
+          "explicit": false
+        },
+        {
+          "title": "Magic Hearts",
+          "artist": "Jupiluxe",
+          "uri": "spotify:track:2OKYKBOPme7UZrXaqwYxjy",
+          "durationMs": 237140,
+          "explicit": true
+        }
+      ],
+      "trackSource": {
+        "url": "https://open.spotify.com/embed/playlist/6VWaYZbC9La3vbG2qIywXq",
+        "retrievedAt": "2026-10-04T07:27:22.230167+00:00",
+        "coverage": "Tracks exposed by the public Spotify embed; not an authenticated full-library sync",
+        "count": 6
+      }
+    }
+  ]
+}

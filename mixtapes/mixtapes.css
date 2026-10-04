@@ -1,0 +1,43 @@
+.mixtapes { margin-top:5rem;padding-top:2rem;border-top:1px solid #102d2229; }
+.mixtapes-header { display:flex;justify-content:space-between;align-items:baseline;gap:2rem; }
+.mixtapes h3 { margin:0;font:400 clamp(24px,3vw,36px)/1.2 'Manrope',sans-serif;letter-spacing:-.045em; }
+.mixtapes-header p { max-width:25rem;font-size:12px;line-height:1.6;opacity:.7; }
+.mixtape-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2rem; }
+.mixtape-grid.is-single { grid-template-columns:minmax(0,52rem);justify-content:center; }
+.mixtape-stage { position:relative; }
+.mixtape-zoom-controls { display:flex;align-items:center;justify-content:center;gap:10px;margin:0 auto 22px;font:12px 'Selectric Mono',monospace; }
+.mixtape-zoom-controls[hidden],.mixtape-song-zoom[hidden] { display:none; }
+.mixtape-zoom-controls button { border:1px solid #102d2240;background:none;color:inherit;font:inherit;min-width:36px;min-height:36px;border-radius:999px;cursor:pointer;padding:6px 10px; }
+.mixtape-zoom-controls input { width:clamp(60px,18vw,130px);accent-color:#697060;cursor:pointer; }
+.mixtape-zoom-status { min-width:3ch; }
+.mixtape-song-row { display:flex;align-items:center;gap:10px; }
+.mixtape-song { flex:1; }
+.mixtape-track-access .mixtape-song-zoom { border:1px solid #102d2240;border-radius:999px;padding:6px 10px;font-size:12px; }
+.mixtape-song-zoom[aria-pressed="true"] { background:#102d2210; }
+.is-song-focused .mixtape-player-overlay { top:auto;bottom:0;transform:translateX(-50%); }
+.mixtape-card { min-width:0;text-align:center;padding-bottom:1rem; }
+.mixtape-canvas { display:block;width:100%;aspect-ratio:1.12;touch-action:pan-y;cursor:grab; }
+.mixtape-canvas:active { cursor:grabbing; }
+.mixtape-canvas:focus-visible { outline:1px dashed #697060;outline-offset:4px; }
+.mixtape-date { font:12px 'Selectric Mono',monospace;letter-spacing:.08em;color:#697060;margin:0 0 .6rem; }
+.mixtape-card h4 { font:400 19px 'Selectric Mono',monospace;overflow-wrap:anywhere;margin:0 0 1rem; }
+.mixtape-actions { display:flex;justify-content:center;align-items:center;gap:1rem;flex-wrap:wrap;font:11px 'DM Mono',monospace; }
+.mixtape-actions button,.mixtape-pagination button { padding:9px 14px;border:1px solid #102d2240;background:none;border-radius:999px;color:inherit;font:inherit;cursor:pointer; }
+.mixtape-actions a { color:inherit;text-underline-offset:4px; }
+.mixtape-actions a[aria-disabled="true"] { opacity:.45;cursor:default; }
+.mixtape-embed { display:block;width:100%;height:152px;border:0;border-radius:12px; }
+.mixtape-player-overlay { position:absolute;z-index:2;left:50%;top:56%;transform:translate(-50%,-50%);width:min(420px,94%);background:#f2ecd9;border:1px solid #69706040;border-radius:14px;padding:8px;box-shadow:0 12px 40px #1c302d33;text-align:left; }
+.mixtape-player-overlay[hidden] { display:none; }
+.mixtape-player-top { display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:2px 3px 9px;font:12px 'Selectric Mono',monospace; }
+.mixtape-player-top button { flex-shrink:0;border:0;background:none;color:inherit;cursor:pointer;font:10px 'DM Mono',monospace; }
+.mixtape-track-access { max-width:34rem;margin:1.5rem auto;text-align:left;font:13px/1.5 'Selectric Mono',monospace; }
+.mixtape-track-access summary { text-align:center;cursor:pointer;color:#697060; }
+.mixtape-track-access li { padding:.35rem 0; }
+.mixtape-track-access button { color:inherit;text-align:left;background:none;border:0;cursor:pointer;font:inherit; }
+.mixtape-track-access button:hover { text-decoration:underline; }
+.is-fallback .mixtape-player-overlay { position:relative;left:0;top:0;transform:none;margin:1rem auto; }
+.mixtapes button:disabled { opacity:.45;cursor:default; }
+.mixtape-pagination { display:flex;justify-content:center;align-items:center;gap:1rem;margin-top:1.5rem;font:11px 'DM Mono',monospace; }
+.mixtape-pagination[hidden],.mixtape-canvas[hidden],.mixtape-fallback[hidden] { display:none; }
+.mixtape-fallback { padding:4rem 1rem;font-size:13px;line-height:1.6; }
+@media(max-width:760px) { .mixtapes { margin-top:3rem; }.mixtapes-header { display:block; }.mixtape-grid { grid-template-columns:1fr;gap:1rem; }.mixtape-card { max-width:30rem;width:100%;margin:auto; } }
