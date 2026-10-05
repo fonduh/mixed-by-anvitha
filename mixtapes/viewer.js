@@ -3,7 +3,7 @@ import { GLTFLoader } from '../album/vendor/GLTFLoader.js';
 
 let modelPromise;
 const model=()=>modelPromise??=new GLTFLoader().loadAsync(new URL('../assets/mixtapes/burned-cd-jewel-case.glb',import.meta.url).href);
-export async function mountCase(canvas,button,tape,onSelect=()=>{},onOpenChange=()=>{},onViewChange=()=>{},onEngage=()=>{}){
+export async function mountCase(canvas,button,tape,onSelect=()=>{},onOpenChange=()=>{},onViewChange=()=>{}){
   const gltf=await model();
   if(!canvas.isConnected)return ()=>{};
   await document.fonts.load('20px "Selectric Mono"');
@@ -23,9 +23,9 @@ export async function mountCase(canvas,button,tape,onSelect=()=>{},onOpenChange=
     const panel=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color().setScalar(intensity),side:THREE.DoubleSide}));panel.position.set(x,y,z);panel.lookAt(0,0,0);room.add(panel);
   }
   const pmrem=new THREE.PMREMGenerator(renderer),env=pmrem.fromScene(room,.08);scene.environment=env.texture;pmrem.dispose();room.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});
-  const pack=gltf.scene.clone(true);scene.add(pack);pack.rotation.set(Math.PI/2,-.16,0);
+  const pack=gltf.scene.clone(true);scene.add(pack);pack.rotation.y=-.16;
   const materials=[],textures=[];
-  const tracks=tape.tracks||[],regions=[],showInk=tape.printLabels!==false;
+  const tracks=tape.tracks||[],regions=[];
   // A restrained diffraction tint makes the recording surface recognizable as CD-R.
   const discCanvas=document.createElement('canvas');discCanvas.width=discCanvas.height=512;
   const discContext=discCanvas.getContext('2d'),pixels=discContext.createImageData(512,512),tint=new THREE.Color();
@@ -67,13 +67,12 @@ export async function mountCase(canvas,button,tape,onSelect=()=>{},onOpenChange=
       material.dispose();material=new THREE.MeshBasicMaterial({map:label(o.name==='Disc_Date_Label'),transparent:o.name==='Disc_Date_Label',toneMapped:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1});
     }
     if(tracks.length&&o.name==='Disc_Date_Label')o.visible=false;
-    if(!showInk&&(o.name==='Case_Date_Label'||o.name==='Disc_Date_Label'))o.visible=false;
     if(tracks.length&&o.name==='Lid_Glass')material.opacity=.045;
     if(material.transparent){material.depthWrite=false;material.side=THREE.DoubleSide;}
     o.material=material;materials.push(material);
   });
   let printedDisc;
-  if(tracks.length&&showInk){
+  if(tracks.length){
     const c=document.createElement('canvas');c.width=c.height=1024;const ctx=c.getContext('2d');
     ctx.fillStyle='#26362f';ctx.textAlign='center';ctx.font='48px "Selectric Mono",monospace';ctx.fillText(tape.title,512,211,660);
     const total=Math.floor(tracks.reduce((sum,t)=>sum+t.durationMs,0)/1000);
@@ -101,16 +100,16 @@ export async function mountCase(canvas,button,tape,onSelect=()=>{},onOpenChange=
   if(coverMap){
     coverMap.colorSpace=THREE.SRGBColorSpace;coverMap.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());textures.push(coverMap);
     const material=new THREE.MeshBasicMaterial({map:coverMap,alphaTest:.35,side:THREE.DoubleSide,toneMapped:false});materials.push(material);
-    const height=showInk ? .98 : 1.16,width=height*coverMap.image.width/coverMap.image.height;
+    const height=.98,width=height*coverMap.image.width/coverMap.image.height;
     coverPrint=new THREE.Mesh(new THREE.PlaneGeometry(width,height),material);coverPrint.name='Torn_Photo_Cover';
-    coverPrint.rotation.set(-Math.PI/2,0,-.025);coverPrint.position.set(.045,.124,showInk?-.075:0);pack.add(coverPrint);
+    coverPrint.rotation.set(-Math.PI/2,0,-.025);coverPrint.position.set(.045,.124,-.075);pack.add(coverPrint);
     pack.updateMatrixWorld(true);hinge.attach(coverPrint);
   }
   const reduced=matchMedia('(prefers-reduced-motion: reduce)'),events=new AbortController();
   let disposed=false,raf=0,animation=null,target=0,canSelect=false,zoom=1,focusRegion=null;
   const viewOffset=new THREE.Vector3(),viewCenter=new THREE.Vector3();
   function syncOpen(){const open=target>0&&hinge.rotation.z>=1.95-1e-6;if(open!==canSelect){canSelect=open;onOpenChange(open);}}
-  const bounds=new THREE.Box3(),sphere=new THREE.Sphere(),direction=new THREE.Vector3(.45,.2,3).normalize();
+  const bounds=new THREE.Box3(),sphere=new THREE.Sphere(),direction=(tracks.length?new THREE.Vector3(.3,4,1.5):new THREE.Vector3(.9,2.9,2.7)).normalize();
   function render(){
     if(disposed)return;
     pack.updateMatrixWorld(true);bounds.setFromObject(pack);bounds.getBoundingSphere(sphere);
@@ -126,15 +125,14 @@ export async function mountCase(canvas,button,tape,onSelect=()=>{},onOpenChange=
   function resetZoom(){focusRegion=null;zoom=1;viewOffset.set(0,0,0);viewChanged();}
   function focusTrack(uri){if(!canSelect)return;const region=regions.find(r=>r.track.uri===uri);if(!region)return;focusRegion=region;zoom=3.2;viewOffset.set(0,0,0);viewChanged();}
   function resize(){const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();render();}
-  function pose(angle){hinge.rotation.z=angle;const progress=angle/1.95;pack.rotation.x=Math.PI/2*(1-progress);direction.set(.45*(1-progress)+.3*progress,.2*(1-progress)+4*progress,3*(1-progress)+1.5*progress).normalize();syncOpen();canvas.dataset.open=String(canSelect);render();if(angle===0&&!target)onEngage(false);}
+  function pose(angle){hinge.rotation.z=angle;syncOpen();canvas.dataset.open=String(canSelect);render();}
   function settle(){cancelAnimationFrame(raf);animation=null;pose(target);}
   function frame(time){if(disposed||!animation)return;const t=Math.min(1,(time-animation.start)/650);pose(THREE.MathUtils.lerp(animation.from,target,t*t*(3-2*t)));if(t<1)raf=requestAnimationFrame(frame);else animation=null;}
-  function toggle(){target=target?0:1.95;if(target)onEngage(true);resetZoom();syncOpen();button.setAttribute('aria-label',target?'Return to collection':'Open case');button.setAttribute('aria-expanded',String(Boolean(target)));cancelAnimationFrame(raf);if(reduced.matches){settle();return;}animation={start:performance.now(),from:hinge.rotation.z};raf=requestAnimationFrame(frame);}
+  function toggle(){target=target?0:1.95;resetZoom();syncOpen();button.textContent=target?'Close case':'Open case';button.setAttribute('aria-expanded',String(Boolean(target)));cancelAnimationFrame(raf);if(reduced.matches){settle();return;}animation={start:performance.now(),from:hinge.rotation.z};raf=requestAnimationFrame(frame);}
   button.disabled=false;button.addEventListener('click',toggle,{signal:events.signal});
   reduced.addEventListener('change',settle,{signal:events.signal});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)settle();},{signal:events.signal});
-  let drag,pinch=null;
-  const touches=new Map();
+  let drag;
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
   canvas.addEventListener('wheel',event=>{
     if(!event.deltaY)return;
@@ -154,18 +152,12 @@ export async function mountCase(canvas,button,tape,onSelect=()=>{},onOpenChange=
     const x=hit.uv.x*1024,y=(1-hit.uv.y)*1024;
     return regions.find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h)?.track;
   }
-  function selectedDisc(event){
-    if(!canSelect||showInk)return false;
-    const box=canvas.getBoundingClientRect();pointer.set((event.clientX-box.left)/box.width*2-1,1-(event.clientY-box.top)/box.height*2);raycaster.setFromCamera(pointer,camera);
-    const disc=pack.getObjectByName('Recorded_Area');if(!disc)return false;
-    const hit=raycaster.intersectObjects(coverPrint?[coverPrint,disc]:[disc])[0];return hit?.object===disc;
-  }
-  canvas.addEventListener('pointerdown',e=>{if(e.button!==0)return;touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touches.size===2){const [a,b]=[...touches.values()];pinch={distance:Math.max(1,Math.hypot(a.x-b.x,a.y-b.y)),zoom};drag=null;}else if(touches.size===1){drag={x:e.clientX,y:e.clientY,rotation:pack.rotation.y};}canvas.setPointerCapture(e.pointerId);},{signal:events.signal});
-  canvas.addEventListener('pointermove',e=>{if(touches.has(e.pointerId))touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pinch&&touches.size===2){const [a,b]=[...touches.values()];setZoom(pinch.zoom*Math.hypot(a.x-b.x,a.y-b.y)/pinch.distance);}else if(drag){pack.rotation.y=drag.rotation+(e.clientX-drag.x)*.008;render();}},{signal:events.signal});
-  canvas.addEventListener('pointerup',e=>{if(!pinch&&drag&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<6){const track=selectedTrack(e);if(track)onSelect(track);else if(selectedDisc(e))onSelect(null);else if(zoom>1)resetZoom();else toggle();}touches.delete(e.pointerId);drag=null;if(!touches.size)pinch=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);},{signal:events.signal});
-  canvas.addEventListener('pointercancel',e=>{touches.delete(e.pointerId);drag=null;if(!touches.size)pinch=null;},{signal:events.signal});
+  canvas.addEventListener('pointerdown',e=>{if(e.button!==0)return;drag={x:e.clientX,y:e.clientY,rotation:pack.rotation.y};canvas.setPointerCapture(e.pointerId);},{signal:events.signal});
+  canvas.addEventListener('pointermove',e=>{if(drag){pack.rotation.y=drag.rotation+(e.clientX-drag.x)*.008;render();}},{signal:events.signal});
+  canvas.addEventListener('pointerup',e=>{if(drag&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<6){const track=selectedTrack(e);if(track)onSelect(track);else toggle();}drag=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);},{signal:events.signal});
+  canvas.addEventListener('pointercancel',()=>{drag=null;},{signal:events.signal});
   canvas.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();pack.rotation.y+=(e.key==='ArrowLeft'?-.15:.15);render();}else if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}else if(e.key==='+'||e.key==='='){e.preventDefault();setZoom(zoom+.25);}else if(e.key==='-'){e.preventDefault();setZoom(zoom-.25);}else if(e.key==='Escape'||e.key==='0'){e.preventDefault();resetZoom();}},{signal:events.signal});
   const observer=new ResizeObserver(resize);observer.observe(canvas);resize();canvas.dataset.ready='true';canvas.dataset.label=tape.label;
-  canvas.caseViewer={renderer,model:pack,hinge,render,setZoom,resetZoom,focusTrack,toggle,trackPoints:()=>regions.map(r=>{const point=new THREE.Vector3((r.x+70)/1024*1.2-.6+.045,.087,(r.y+50)/1024*1.2-.6);pack.localToWorld(point);point.project(camera);const box=canvas.getBoundingClientRect();return {title:r.track.title,x:box.x+(point.x+1)*box.width/2,y:box.y+(1-point.y)*box.height/2};})};viewChanged();
+  canvas.caseViewer={renderer,model:pack,hinge,render,setZoom,resetZoom,focusTrack,trackPoints:()=>regions.map(r=>{const point=new THREE.Vector3((r.x+70)/1024*1.2-.6+.045,.087,(r.y+50)/1024*1.2-.6);pack.localToWorld(point);point.project(camera);const box=canvas.getBoundingClientRect();return {title:r.track.title,x:box.x+(point.x+1)*box.width/2,y:box.y+(1-point.y)*box.height/2};})};viewChanged();
   return ()=>{disposed=true;events.abort();observer.disconnect();cancelAnimationFrame(raf);printedDisc?.geometry.dispose();coverPrint?.geometry.dispose();materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());env.texture.dispose();env.dispose();renderer.dispose();};
 }
