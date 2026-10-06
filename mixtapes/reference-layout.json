@@ -1,0 +1,2519 @@
+{
+  "source": "User-provided IMG_3051.HEIC; EXIF orientation applied",
+  "imageSizePx": [
+    1368,
+    1824
+  ],
+  "method": "Manually traced 85 visible spine centerlines, with nearby long plastic edges used to refine slopes. Spacing is perpendicular center-to-center spacing, not empty edge-to-edge clearance.",
+  "uncertainty": "Approximate image-plane measurements: centers about +/-3 px; angles about +/-0.4 to 0.7 degrees. Hidden discs are not counted. Three out-of-plane lean values are estimates.",
+  "boxOutlinePx": [
+    [
+      214,
+      0
+    ],
+    [
+      1053,
+      0
+    ],
+    [
+      1108,
+      750
+    ],
+    [
+      1060,
+      1643
+    ],
+    [
+      262,
+      1648
+    ],
+    [
+      195,
+      674
+    ]
+  ],
+  "boundsPx": [
+    195,
+    0,
+    1108,
+    1648
+  ],
+  "medianSpineWidthPx": 369.004,
+  "medianCenterSpacingPx": 32.097,
+  "worldUnitsPerPixel": 0.00338749715450239,
+  "caseThicknessScale": 0.6431,
+  "columns": {
+    "L": 44,
+    "R": 41
+  },
+  "spines": [
+    {
+      "id": "L01",
+      "column": "L",
+      "order": 1,
+      "endpointsPx": [
+        [
+          252,
+          30.17
+        ],
+        [
+          633,
+          26.83
+        ]
+      ],
+      "centerPx": [
+        442.5,
+        28.5
+      ],
+      "widthPx": 381.015,
+      "angleDeg": -0.503,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#8b3135",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 41.998,
+      "nextSpacingInSpineWidths": 0.11023
+    },
+    {
+      "id": "L02",
+      "column": "L",
+      "order": 2,
+      "endpointsPx": [
+        [
+          247,
+          79.0
+        ],
+        [
+          638,
+          62.0
+        ]
+      ],
+      "centerPx": [
+        442.5,
+        70.5
+      ],
+      "widthPx": 391.369,
+      "angleDeg": -2.49,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#e4d8c7",
+      "leanDeg": -26.446,
+      "leanSource": "Estimated from visible face projection; unknown camera depth prevents a unique 3D solution.",
+      "visibleFaceExtentPx": 198,
+      "nextCenterSpacingPx": 232.867,
+      "nextSpacingInSpineWidths": 0.59501
+    },
+    {
+      "id": "L03",
+      "column": "L",
+      "order": 3,
+      "endpointsPx": [
+        [
+          260,
+          316.0
+        ],
+        [
+          629,
+          291.0
+        ]
+      ],
+      "centerPx": [
+        444.5,
+        303.5
+      ],
+      "widthPx": 369.846,
+      "angleDeg": -3.876,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#f87e5e",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 36.645,
+      "nextSpacingInSpineWidths": 0.09908
+    },
+    {
+      "id": "L04",
+      "column": "L",
+      "order": 4,
+      "endpointsPx": [
+        [
+          253,
+          354.29
+        ],
+        [
+          628,
+          326.71
+        ]
+      ],
+      "centerPx": [
+        440.5,
+        340.5
+      ],
+      "widthPx": 376.013,
+      "angleDeg": -4.207,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#565357",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 29.2,
+      "nextSpacingInSpineWidths": 0.07766
+    },
+    {
+      "id": "L05",
+      "column": "L",
+      "order": 5,
+      "endpointsPx": [
+        [
+          249,
+          381.65
+        ],
+        [
+          626,
+          358.35
+        ]
+      ],
+      "centerPx": [
+        437.5,
+        370.0
+      ],
+      "widthPx": 377.719,
+      "angleDeg": -3.537,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#e5caae",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 31.003,
+      "nextSpacingInSpineWidths": 0.08208
+    },
+    {
+      "id": "L06",
+      "column": "L",
+      "order": 6,
+      "endpointsPx": [
+        [
+          251,
+          413.0
+        ],
+        [
+          626,
+          389.0
+        ]
+      ],
+      "centerPx": [
+        438.5,
+        401.0
+      ],
+      "widthPx": 375.767,
+      "angleDeg": -3.662,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#c97270",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 34.198,
+      "nextSpacingInSpineWidths": 0.09101
+    },
+    {
+      "id": "L07",
+      "column": "L",
+      "order": 7,
+      "endpointsPx": [
+        [
+          269,
+          446.0
+        ],
+        [
+          632,
+          423.0
+        ]
+      ],
+      "centerPx": [
+        450.5,
+        434.5
+      ],
+      "widthPx": 363.728,
+      "angleDeg": -3.625,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#676163",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 31.961,
+      "nextSpacingInSpineWidths": 0.08787
+    },
+    {
+      "id": "L08",
+      "column": "L",
+      "order": 8,
+      "endpointsPx": [
+        [
+          254,
+          478.78
+        ],
+        [
+          632,
+          455.22
+        ]
+      ],
+      "centerPx": [
+        443.0,
+        467.0
+      ],
+      "widthPx": 378.733,
+      "angleDeg": -3.566,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#8eb1bd",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.593,
+      "nextSpacingInSpineWidths": 0.08606
+    },
+    {
+      "id": "L09",
+      "column": "L",
+      "order": 9,
+      "endpointsPx": [
+        [
+          256,
+          512.0
+        ],
+        [
+          635,
+          487.0
+        ]
+      ],
+      "centerPx": [
+        445.5,
+        499.5
+      ],
+      "widthPx": 379.824,
+      "angleDeg": -3.774,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#696b74",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 36.552,
+      "nextSpacingInSpineWidths": 0.09624
+    },
+    {
+      "id": "L10",
+      "column": "L",
+      "order": 10,
+      "endpointsPx": [
+        [
+          255,
+          546.0
+        ],
+        [
+          640,
+          526.0
+        ]
+      ],
+      "centerPx": [
+        447.5,
+        536.0
+      ],
+      "widthPx": 385.519,
+      "angleDeg": -2.974,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#cba696",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.482,
+      "nextSpacingInSpineWidths": 0.08426
+    },
+    {
+      "id": "L11",
+      "column": "L",
+      "order": 11,
+      "endpointsPx": [
+        [
+          259,
+          580.0
+        ],
+        [
+          637,
+          557.0
+        ]
+      ],
+      "centerPx": [
+        448.0,
+        568.5
+      ],
+      "widthPx": 378.699,
+      "angleDeg": -3.482,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#a19798",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.326,
+      "nextSpacingInSpineWidths": 0.08008
+    },
+    {
+      "id": "L12",
+      "column": "L",
+      "order": 12,
+      "endpointsPx": [
+        [
+          277,
+          608.22
+        ],
+        [
+          648,
+          587.78
+        ]
+      ],
+      "centerPx": [
+        462.5,
+        598.0
+      ],
+      "widthPx": 371.562,
+      "angleDeg": -3.153,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#8a8dc4",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 33.98,
+      "nextSpacingInSpineWidths": 0.09145
+    },
+    {
+      "id": "L13",
+      "column": "L",
+      "order": 13,
+      "endpointsPx": [
+        [
+          267,
+          642.42
+        ],
+        [
+          641,
+          622.58
+        ]
+      ],
+      "centerPx": [
+        454.0,
+        632.5
+      ],
+      "widthPx": 374.526,
+      "angleDeg": -3.036,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#656264",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.852,
+      "nextSpacingInSpineWidths": 0.08772
+    },
+    {
+      "id": "L14",
+      "column": "L",
+      "order": 14,
+      "endpointsPx": [
+        [
+          273,
+          676.01
+        ],
+        [
+          650,
+          653.99
+        ]
+      ],
+      "centerPx": [
+        461.5,
+        665.0
+      ],
+      "widthPx": 377.643,
+      "angleDeg": -3.343,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#f8efe2",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.445,
+      "nextSpacingInSpineWidths": 0.08062
+    },
+    {
+      "id": "L15",
+      "column": "L",
+      "order": 15,
+      "endpointsPx": [
+        [
+          285,
+          706.16
+        ],
+        [
+          655,
+          683.84
+        ]
+      ],
+      "centerPx": [
+        470.0,
+        695.0
+      ],
+      "widthPx": 370.673,
+      "angleDeg": -3.453,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#656060",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 34.287,
+      "nextSpacingInSpineWidths": 0.0925
+    },
+    {
+      "id": "L16",
+      "column": "L",
+      "order": 16,
+      "endpointsPx": [
+        [
+          281,
+          741.23
+        ],
+        [
+          654,
+          717.77
+        ]
+      ],
+      "centerPx": [
+        467.5,
+        729.5
+      ],
+      "widthPx": 373.738,
+      "angleDeg": -3.6,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#e7e3da",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 26.137,
+      "nextSpacingInSpineWidths": 0.06993
+    },
+    {
+      "id": "L17",
+      "column": "L",
+      "order": 17,
+      "endpointsPx": [
+        [
+          288,
+          767.41
+        ],
+        [
+          653,
+          743.59
+        ]
+      ],
+      "centerPx": [
+        470.5,
+        755.5
+      ],
+      "widthPx": 365.776,
+      "angleDeg": -3.734,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#f76862",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 34.73,
+      "nextSpacingInSpineWidths": 0.09495
+    },
+    {
+      "id": "L18",
+      "column": "L",
+      "order": 18,
+      "endpointsPx": [
+        [
+          284,
+          803.0
+        ],
+        [
+          651,
+          778.0
+        ]
+      ],
+      "centerPx": [
+        467.5,
+        790.5
+      ],
+      "widthPx": 367.851,
+      "angleDeg": -3.897,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#c16366",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 33.989,
+      "nextSpacingInSpineWidths": 0.0924
+    },
+    {
+      "id": "L19",
+      "column": "L",
+      "order": 19,
+      "endpointsPx": [
+        [
+          284,
+          838.0
+        ],
+        [
+          653,
+          811.0
+        ]
+      ],
+      "centerPx": [
+        468.5,
+        824.5
+      ],
+      "widthPx": 369.986,
+      "angleDeg": -4.185,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#dd6568",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 28.704,
+      "nextSpacingInSpineWidths": 0.07758
+    },
+    {
+      "id": "L20",
+      "column": "L",
+      "order": 20,
+      "endpointsPx": [
+        [
+          280,
+          866.44
+        ],
+        [
+          651,
+          840.56
+        ]
+      ],
+      "centerPx": [
+        465.5,
+        853.5
+      ],
+      "widthPx": 371.902,
+      "angleDeg": -3.991,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#f6dbdb",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.015,
+      "nextSpacingInSpineWidths": 0.08609
+    },
+    {
+      "id": "L21",
+      "column": "L",
+      "order": 21,
+      "endpointsPx": [
+        [
+          291,
+          897.0
+        ],
+        [
+          657,
+          873.0
+        ]
+      ],
+      "centerPx": [
+        474.0,
+        885.0
+      ],
+      "widthPx": 366.786,
+      "angleDeg": -3.752,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#e9d8cb",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 29.134,
+      "nextSpacingInSpineWidths": 0.07943
+    },
+    {
+      "id": "L22",
+      "column": "L",
+      "order": 22,
+      "endpointsPx": [
+        [
+          295,
+          927.16
+        ],
+        [
+          659,
+          900.84
+        ]
+      ],
+      "centerPx": [
+        477.0,
+        914.0
+      ],
+      "widthPx": 364.95,
+      "angleDeg": -4.135,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#a9b4d6",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 31.31,
+      "nextSpacingInSpineWidths": 0.08579
+    },
+    {
+      "id": "L23",
+      "column": "L",
+      "order": 23,
+      "endpointsPx": [
+        [
+          292,
+          958.93
+        ],
+        [
+          659,
+          932.07
+        ]
+      ],
+      "centerPx": [
+        475.5,
+        945.5
+      ],
+      "widthPx": 367.981,
+      "angleDeg": -4.185,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#de7672",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.401,
+      "nextSpacingInSpineWidths": 0.08805
+    },
+    {
+      "id": "L24",
+      "column": "L",
+      "order": 24,
+      "endpointsPx": [
+        [
+          280,
+          991.66
+        ],
+        [
+          657,
+          965.34
+        ]
+      ],
+      "centerPx": [
+        468.5,
+        978.5
+      ],
+      "widthPx": 377.918,
+      "angleDeg": -3.993,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#5d595a",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.386,
+      "nextSpacingInSpineWidths": 0.0857
+    },
+    {
+      "id": "L25",
+      "column": "L",
+      "order": 25,
+      "endpointsPx": [
+        [
+          280,
+          1025.0
+        ],
+        [
+          656,
+          997.0
+        ]
+      ],
+      "centerPx": [
+        468.0,
+        1011.0
+      ],
+      "widthPx": 377.041,
+      "angleDeg": -4.259,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#6f6568",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 33.354,
+      "nextSpacingInSpineWidths": 0.08846
+    },
+    {
+      "id": "L26",
+      "column": "L",
+      "order": 26,
+      "endpointsPx": [
+        [
+          289,
+          1058.31
+        ],
+        [
+          659,
+          1029.69
+        ]
+      ],
+      "centerPx": [
+        474.0,
+        1044.0
+      ],
+      "widthPx": 371.106,
+      "angleDeg": -4.425,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#6b6261",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.365,
+      "nextSpacingInSpineWidths": 0.08721
+    },
+    {
+      "id": "L27",
+      "column": "L",
+      "order": 27,
+      "endpointsPx": [
+        [
+          289,
+          1090.0
+        ],
+        [
+          658,
+          1063.0
+        ]
+      ],
+      "centerPx": [
+        473.5,
+        1076.5
+      ],
+      "widthPx": 369.986,
+      "angleDeg": -4.185,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#5d5456",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.2,
+      "nextSpacingInSpineWidths": 0.08162
+    },
+    {
+      "id": "L28",
+      "column": "L",
+      "order": 28,
+      "endpointsPx": [
+        [
+          283,
+          1121.06
+        ],
+        [
+          658,
+          1092.94
+        ]
+      ],
+      "centerPx": [
+        470.5,
+        1107.0
+      ],
+      "widthPx": 376.053,
+      "angleDeg": -4.288,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#796972",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.521,
+      "nextSpacingInSpineWidths": 0.08648
+    },
+    {
+      "id": "L29",
+      "column": "L",
+      "order": 29,
+      "endpointsPx": [
+        [
+          284,
+          1154.0
+        ],
+        [
+          660,
+          1125.0
+        ]
+      ],
+      "centerPx": [
+        472.0,
+        1139.5
+      ],
+      "widthPx": 377.117,
+      "angleDeg": -4.41,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#73634a",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 31.215,
+      "nextSpacingInSpineWidths": 0.08277
+    },
+    {
+      "id": "L30",
+      "column": "L",
+      "order": 30,
+      "endpointsPx": [
+        [
+          280,
+          1184.0
+        ],
+        [
+          659,
+          1158.0
+        ]
+      ],
+      "centerPx": [
+        469.5,
+        1171.0
+      ],
+      "widthPx": 379.891,
+      "angleDeg": -3.924,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#ab9f71",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.492,
+      "nextSpacingInSpineWidths": 0.08553
+    },
+    {
+      "id": "L31",
+      "column": "L",
+      "order": 31,
+      "endpointsPx": [
+        [
+          280,
+          1218.0
+        ],
+        [
+          661,
+          1189.0
+        ]
+      ],
+      "centerPx": [
+        470.5,
+        1203.5
+      ],
+      "widthPx": 382.102,
+      "angleDeg": -4.353,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#ccbb86",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 31.1,
+      "nextSpacingInSpineWidths": 0.08139
+    },
+    {
+      "id": "L32",
+      "column": "L",
+      "order": 32,
+      "endpointsPx": [
+        [
+          284,
+          1244.46
+        ],
+        [
+          662,
+          1224.54
+        ]
+      ],
+      "centerPx": [
+        473.0,
+        1234.5
+      ],
+      "widthPx": 378.524,
+      "angleDeg": -3.015,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#fdf2e5",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 34.11,
+      "nextSpacingInSpineWidths": 0.09011
+    },
+    {
+      "id": "L33",
+      "column": "L",
+      "order": 33,
+      "endpointsPx": [
+        [
+          273,
+          1279.0
+        ],
+        [
+          660,
+          1259.0
+        ]
+      ],
+      "centerPx": [
+        466.5,
+        1269.0
+      ],
+      "widthPx": 387.516,
+      "angleDeg": -2.958,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#595756",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.115,
+      "nextSpacingInSpineWidths": 0.07771
+    },
+    {
+      "id": "L34",
+      "column": "L",
+      "order": 34,
+      "endpointsPx": [
+        [
+          279,
+          1307.59
+        ],
+        [
+          660,
+          1290.41
+        ]
+      ],
+      "centerPx": [
+        469.5,
+        1299.0
+      ],
+      "widthPx": 381.387,
+      "angleDeg": -2.582,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#5a5656",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 34.213,
+      "nextSpacingInSpineWidths": 0.08971
+    },
+    {
+      "id": "L35",
+      "column": "L",
+      "order": 35,
+      "endpointsPx": [
+        [
+          291,
+          1342.0
+        ],
+        [
+          659,
+          1324.0
+        ]
+      ],
+      "centerPx": [
+        475.0,
+        1333.0
+      ],
+      "widthPx": 368.44,
+      "angleDeg": -2.8,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#fa554e",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.79,
+      "nextSpacingInSpineWidths": 0.089
+    },
+    {
+      "id": "L36",
+      "column": "L",
+      "order": 36,
+      "endpointsPx": [
+        [
+          284,
+          1373.91
+        ],
+        [
+          659,
+          1358.09
+        ]
+      ],
+      "centerPx": [
+        471.5,
+        1366.0
+      ],
+      "widthPx": 375.333,
+      "angleDeg": -2.415,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#565253",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.93,
+      "nextSpacingInSpineWidths": 0.08241
+    },
+    {
+      "id": "L37",
+      "column": "L",
+      "order": 37,
+      "endpointsPx": [
+        [
+          282,
+          1404.51
+        ],
+        [
+          659,
+          1389.49
+        ]
+      ],
+      "centerPx": [
+        470.5,
+        1397.0
+      ],
+      "widthPx": 377.299,
+      "angleDeg": -2.282,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#504c4c",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.034,
+      "nextSpacingInSpineWidths": 0.0849
+    },
+    {
+      "id": "L38",
+      "column": "L",
+      "order": 38,
+      "endpointsPx": [
+        [
+          284,
+          1436.67
+        ],
+        [
+          660,
+          1421.33
+        ]
+      ],
+      "centerPx": [
+        472.0,
+        1429.0
+      ],
+      "widthPx": 376.313,
+      "angleDeg": -2.337,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#4fa9e5",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.432,
+      "nextSpacingInSpineWidths": 0.08618
+    },
+    {
+      "id": "L39",
+      "column": "L",
+      "order": 39,
+      "endpointsPx": [
+        [
+          282,
+          1467.0
+        ],
+        [
+          660,
+          1456.0
+        ]
+      ],
+      "centerPx": [
+        471.0,
+        1461.5
+      ],
+      "widthPx": 378.16,
+      "angleDeg": -1.667,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#e75050",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 28.959,
+      "nextSpacingInSpineWidths": 0.07658
+    },
+    {
+      "id": "L40",
+      "column": "L",
+      "order": 40,
+      "endpointsPx": [
+        [
+          281,
+          1496.0
+        ],
+        [
+          659,
+          1485.0
+        ]
+      ],
+      "centerPx": [
+        470.0,
+        1490.5
+      ],
+      "widthPx": 378.16,
+      "angleDeg": -1.667,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#7e403f",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 28.517,
+      "nextSpacingInSpineWidths": 0.07541
+    },
+    {
+      "id": "L41",
+      "column": "L",
+      "order": 41,
+      "endpointsPx": [
+        [
+          284,
+          1522.36
+        ],
+        [
+          658,
+          1515.64
+        ]
+      ],
+      "centerPx": [
+        471.0,
+        1519.0
+      ],
+      "widthPx": 374.06,
+      "angleDeg": -1.028,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#c7bfb8",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 29.977,
+      "nextSpacingInSpineWidths": 0.08014
+    },
+    {
+      "id": "L42",
+      "column": "L",
+      "order": 42,
+      "endpointsPx": [
+        [
+          282,
+          1553.04
+        ],
+        [
+          658,
+          1544.96
+        ]
+      ],
+      "centerPx": [
+        470.0,
+        1549.0
+      ],
+      "widthPx": 376.087,
+      "angleDeg": -1.231,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#a2836b",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.025,
+      "nextSpacingInSpineWidths": 0.07984
+    },
+    {
+      "id": "L43",
+      "column": "L",
+      "order": 43,
+      "endpointsPx": [
+        [
+          284,
+          1583.0
+        ],
+        [
+          659,
+          1575.0
+        ]
+      ],
+      "centerPx": [
+        471.5,
+        1579.0
+      ],
+      "widthPx": 375.085,
+      "angleDeg": -1.222,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#af7667",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.929,
+      "nextSpacingInSpineWidths": 0.08246
+    },
+    {
+      "id": "L44",
+      "column": "L",
+      "order": 44,
+      "endpointsPx": [
+        [
+          279,
+          1614.0
+        ],
+        [
+          658,
+          1606.0
+        ]
+      ],
+      "centerPx": [
+        468.5,
+        1610.0
+      ],
+      "widthPx": 379.084,
+      "angleDeg": -1.209,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#6f6670",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": null,
+      "nextSpacingInSpineWidths": null
+    },
+    {
+      "id": "R01",
+      "column": "R",
+      "order": 1,
+      "endpointsPx": [
+        [
+          650,
+          28.53
+        ],
+        [
+          1018,
+          29.47
+        ]
+      ],
+      "centerPx": [
+        834.0,
+        29.0
+      ],
+      "widthPx": 368.001,
+      "angleDeg": 0.148,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#ede2d7",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.0,
+      "nextSpacingInSpineWidths": 0.08152
+    },
+    {
+      "id": "R02",
+      "column": "R",
+      "order": 2,
+      "endpointsPx": [
+        [
+          650,
+          58.83
+        ],
+        [
+          1018,
+          59.17
+        ]
+      ],
+      "centerPx": [
+        834.0,
+        59.0
+      ],
+      "widthPx": 368.0,
+      "angleDeg": 0.054,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#c37379",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 28.0,
+      "nextSpacingInSpineWidths": 0.07609
+    },
+    {
+      "id": "R03",
+      "column": "R",
+      "order": 3,
+      "endpointsPx": [
+        [
+          645,
+          87.59
+        ],
+        [
+          1024,
+          86.41
+        ]
+      ],
+      "centerPx": [
+        834.5,
+        87.0
+      ],
+      "widthPx": 379.002,
+      "angleDeg": -0.177,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#f6e9d6",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 31.001,
+      "nextSpacingInSpineWidths": 0.0818
+    },
+    {
+      "id": "R04",
+      "column": "R",
+      "order": 4,
+      "endpointsPx": [
+        [
+          650,
+          118.24
+        ],
+        [
+          1020,
+          117.76
+        ]
+      ],
+      "centerPx": [
+        835.0,
+        118.0
+      ],
+      "widthPx": 370.0,
+      "angleDeg": -0.075,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#d9cec0",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 31.998,
+      "nextSpacingInSpineWidths": 0.08648
+    },
+    {
+      "id": "R05",
+      "column": "R",
+      "order": 5,
+      "endpointsPx": [
+        [
+          649,
+          150.83
+        ],
+        [
+          1018,
+          149.17
+        ]
+      ],
+      "centerPx": [
+        833.5,
+        150.0
+      ],
+      "widthPx": 369.004,
+      "angleDeg": -0.258,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#f0e5d8",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.0,
+      "nextSpacingInSpineWidths": 0.08672
+    },
+    {
+      "id": "R06",
+      "column": "R",
+      "order": 6,
+      "endpointsPx": [
+        [
+          649,
+          181.53
+        ],
+        [
+          1018,
+          182.47
+        ]
+      ],
+      "centerPx": [
+        833.5,
+        182.0
+      ],
+      "widthPx": 369.001,
+      "angleDeg": 0.145,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#5b3c40",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 41.988,
+      "nextSpacingInSpineWidths": 0.11379
+    },
+    {
+      "id": "R07",
+      "column": "R",
+      "order": 7,
+      "endpointsPx": [
+        [
+          654,
+          224.23
+        ],
+        [
+          1022,
+          223.77
+        ]
+      ],
+      "centerPx": [
+        838.0,
+        224.0
+      ],
+      "widthPx": 368.0,
+      "angleDeg": -0.072,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#b09866",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 33.999,
+      "nextSpacingInSpineWidths": 0.09239
+    },
+    {
+      "id": "R08",
+      "column": "R",
+      "order": 8,
+      "endpointsPx": [
+        [
+          650,
+          257.93
+        ],
+        [
+          1025,
+          258.07
+        ]
+      ],
+      "centerPx": [
+        837.5,
+        258.0
+      ],
+      "widthPx": 375.0,
+      "angleDeg": 0.022,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#ded4c8",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 40.499,
+      "nextSpacingInSpineWidths": 0.108
+    },
+    {
+      "id": "R09",
+      "column": "R",
+      "order": 9,
+      "endpointsPx": [
+        [
+          655,
+          298.61
+        ],
+        [
+          1025,
+          298.39
+        ]
+      ],
+      "centerPx": [
+        840.0,
+        298.5
+      ],
+      "widthPx": 370.0,
+      "angleDeg": -0.034,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#97918a",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 38.001,
+      "nextSpacingInSpineWidths": 0.1027
+    },
+    {
+      "id": "R10",
+      "column": "R",
+      "order": 10,
+      "endpointsPx": [
+        [
+          657,
+          337.0
+        ],
+        [
+          1025,
+          336.0
+        ]
+      ],
+      "centerPx": [
+        841.0,
+        336.5
+      ],
+      "widthPx": 368.001,
+      "angleDeg": -0.156,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#5e5a5b",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.494,
+      "nextSpacingInSpineWidths": 0.08287
+    },
+    {
+      "id": "R11",
+      "column": "R",
+      "order": 11,
+      "endpointsPx": [
+        [
+          654,
+          367.99
+        ],
+        [
+          1024,
+          366.01
+        ]
+      ],
+      "centerPx": [
+        839.0,
+        367.0
+      ],
+      "widthPx": 370.005,
+      "angleDeg": -0.305,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#373637",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.018,
+      "nextSpacingInSpineWidths": 0.08653
+    },
+    {
+      "id": "R12",
+      "column": "R",
+      "order": 12,
+      "endpointsPx": [
+        [
+          660,
+          400.0
+        ],
+        [
+          1025,
+          398.0
+        ]
+      ],
+      "centerPx": [
+        842.5,
+        399.0
+      ],
+      "widthPx": 365.005,
+      "angleDeg": -0.314,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#5e5a5a",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 35.502,
+      "nextSpacingInSpineWidths": 0.09726
+    },
+    {
+      "id": "R13",
+      "column": "R",
+      "order": 13,
+      "endpointsPx": [
+        [
+          660,
+          435.72
+        ],
+        [
+          1026,
+          433.28
+        ]
+      ],
+      "centerPx": [
+        843.0,
+        434.5
+      ],
+      "widthPx": 366.008,
+      "angleDeg": -0.381,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#6c4238",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 34.009,
+      "nextSpacingInSpineWidths": 0.09292
+    },
+    {
+      "id": "R14",
+      "column": "R",
+      "order": 14,
+      "endpointsPx": [
+        [
+          662,
+          470.09
+        ],
+        [
+          1027,
+          466.91
+        ]
+      ],
+      "centerPx": [
+        844.5,
+        468.5
+      ],
+      "widthPx": 365.014,
+      "angleDeg": -0.499,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#e7c2b4",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 33.021,
+      "nextSpacingInSpineWidths": 0.09046
+    },
+    {
+      "id": "R15",
+      "column": "R",
+      "order": 15,
+      "endpointsPx": [
+        [
+          667,
+          503.2
+        ],
+        [
+          1027,
+          499.8
+        ]
+      ],
+      "centerPx": [
+        847.0,
+        501.5
+      ],
+      "widthPx": 360.016,
+      "angleDeg": -0.543,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#312e2f",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 35.003,
+      "nextSpacingInSpineWidths": 0.09723
+    },
+    {
+      "id": "R16",
+      "column": "R",
+      "order": 16,
+      "endpointsPx": [
+        [
+          665,
+          539.0
+        ],
+        [
+          1030,
+          534.0
+        ]
+      ],
+      "centerPx": [
+        847.5,
+        536.5
+      ],
+      "widthPx": 365.034,
+      "angleDeg": -0.785,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#c49fab",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 36.524,
+      "nextSpacingInSpineWidths": 0.10006
+    },
+    {
+      "id": "R17",
+      "column": "R",
+      "order": 17,
+      "endpointsPx": [
+        [
+          669,
+          574.0
+        ],
+        [
+          1030,
+          572.0
+        ]
+      ],
+      "centerPx": [
+        849.5,
+        573.0
+      ],
+      "widthPx": 361.006,
+      "angleDeg": -0.317,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#332e2e",
+      "leanDeg": -25.26,
+      "leanSource": "Estimated from visible face projection; unknown camera depth prevents a unique 3D solution.",
+      "visibleFaceExtentPx": 175,
+      "nextCenterSpacingPx": 309.564,
+      "nextSpacingInSpineWidths": 0.8575
+    },
+    {
+      "id": "R18",
+      "column": "R",
+      "order": 18,
+      "endpointsPx": [
+        [
+          684,
+          901.13
+        ],
+        [
+          1040,
+          863.87
+        ]
+      ],
+      "centerPx": [
+        862.0,
+        882.5
+      ],
+      "widthPx": 357.944,
+      "angleDeg": -5.975,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#5d5553",
+      "leanDeg": 11.203,
+      "leanSource": "Estimated from visible face projection; unknown camera depth prevents a unique 3D solution.",
+      "visibleFaceExtentPx": -79,
+      "nextCenterSpacingPx": 30.334,
+      "nextSpacingInSpineWidths": 0.08475
+    },
+    {
+      "id": "R19",
+      "column": "R",
+      "order": 19,
+      "endpointsPx": [
+        [
+          683,
+          931.0
+        ],
+        [
+          1041,
+          895.0
+        ]
+      ],
+      "centerPx": [
+        862.0,
+        913.0
+      ],
+      "widthPx": 359.806,
+      "angleDeg": -5.742,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#726b68",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 29.699,
+      "nextSpacingInSpineWidths": 0.08254
+    },
+    {
+      "id": "R20",
+      "column": "R",
+      "order": 20,
+      "endpointsPx": [
+        [
+          680,
+          961.0
+        ],
+        [
+          1041,
+          925.0
+        ]
+      ],
+      "centerPx": [
+        860.5,
+        943.0
+      ],
+      "widthPx": 362.791,
+      "angleDeg": -5.695,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#f6c9ca",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.887,
+      "nextSpacingInSpineWidths": 0.09065
+    },
+    {
+      "id": "R21",
+      "column": "R",
+      "order": 21,
+      "endpointsPx": [
+        [
+          681,
+          993.82
+        ],
+        [
+          1041,
+          958.18
+        ]
+      ],
+      "centerPx": [
+        861.0,
+        976.0
+      ],
+      "widthPx": 361.761,
+      "angleDeg": -5.655,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#f2bdbb",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.741,
+      "nextSpacingInSpineWidths": 0.0905
+    },
+    {
+      "id": "R22",
+      "column": "R",
+      "order": 22,
+      "endpointsPx": [
+        [
+          684,
+          1026.01
+        ],
+        [
+          1036,
+          991.99
+        ]
+      ],
+      "centerPx": [
+        860.0,
+        1009.0
+      ],
+      "widthPx": 353.641,
+      "angleDeg": -5.521,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#c07662",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 31.948,
+      "nextSpacingInSpineWidths": 0.09034
+    },
+    {
+      "id": "R23",
+      "column": "R",
+      "order": 23,
+      "endpointsPx": [
+        [
+          684,
+          1058.0
+        ],
+        [
+          1038,
+          1024.0
+        ]
+      ],
+      "centerPx": [
+        861.0,
+        1041.0
+      ],
+      "widthPx": 355.629,
+      "angleDeg": -5.486,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#484546",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.906,
+      "nextSpacingInSpineWidths": 0.0869
+    },
+    {
+      "id": "R24",
+      "column": "R",
+      "order": 24,
+      "endpointsPx": [
+        [
+          684,
+          1090.0
+        ],
+        [
+          1039,
+          1054.0
+        ]
+      ],
+      "centerPx": [
+        861.5,
+        1072.0
+      ],
+      "widthPx": 356.821,
+      "angleDeg": -5.79,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#a9504c",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.385,
+      "nextSpacingInSpineWidths": 0.09076
+    },
+    {
+      "id": "R25",
+      "column": "R",
+      "order": 25,
+      "endpointsPx": [
+        [
+          685,
+          1123.0
+        ],
+        [
+          1039,
+          1086.0
+        ]
+      ],
+      "centerPx": [
+        862.0,
+        1104.5
+      ],
+      "widthPx": 355.928,
+      "angleDeg": -5.967,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#95474b",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.324,
+      "nextSpacingInSpineWidths": 0.09082
+    },
+    {
+      "id": "R26",
+      "column": "R",
+      "order": 26,
+      "endpointsPx": [
+        [
+          686,
+          1155.0
+        ],
+        [
+          1038,
+          1119.0
+        ]
+      ],
+      "centerPx": [
+        862.0,
+        1137.0
+      ],
+      "widthPx": 353.836,
+      "angleDeg": -5.839,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#4f4b54",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.778,
+      "nextSpacingInSpineWidths": 0.09264
+    },
+    {
+      "id": "R27",
+      "column": "R",
+      "order": 27,
+      "endpointsPx": [
+        [
+          684,
+          1188.0
+        ],
+        [
+          1039,
+          1152.0
+        ]
+      ],
+      "centerPx": [
+        861.5,
+        1170.0
+      ],
+      "widthPx": 356.821,
+      "angleDeg": -5.79,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#804e4c",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 31.786,
+      "nextSpacingInSpineWidths": 0.08908
+    },
+    {
+      "id": "R28",
+      "column": "R",
+      "order": 28,
+      "endpointsPx": [
+        [
+          682,
+          1218.0
+        ],
+        [
+          1040,
+          1186.0
+        ]
+      ],
+      "centerPx": [
+        861.0,
+        1202.0
+      ],
+      "widthPx": 359.427,
+      "angleDeg": -5.108,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#929097",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 31.01,
+      "nextSpacingInSpineWidths": 0.08628
+    },
+    {
+      "id": "R29",
+      "column": "R",
+      "order": 29,
+      "endpointsPx": [
+        [
+          685,
+          1248.0
+        ],
+        [
+          1040,
+          1218.0
+        ]
+      ],
+      "centerPx": [
+        862.5,
+        1233.0
+      ],
+      "widthPx": 356.265,
+      "angleDeg": -4.83,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#b0bb7b",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 31.472,
+      "nextSpacingInSpineWidths": 0.08834
+    },
+    {
+      "id": "R30",
+      "column": "R",
+      "order": 30,
+      "endpointsPx": [
+        [
+          687,
+          1279.0
+        ],
+        [
+          1040,
+          1250.0
+        ]
+      ],
+      "centerPx": [
+        863.5,
+        1264.5
+      ],
+      "widthPx": 354.189,
+      "angleDeg": -4.696,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#484752",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.309,
+      "nextSpacingInSpineWidths": 0.09122
+    },
+    {
+      "id": "R31",
+      "column": "R",
+      "order": 31,
+      "endpointsPx": [
+        [
+          685,
+          1312.31
+        ],
+        [
+          1040,
+          1281.69
+        ]
+      ],
+      "centerPx": [
+        862.5,
+        1297.0
+      ],
+      "widthPx": 356.319,
+      "angleDeg": -4.931,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#9095a1",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.595,
+      "nextSpacingInSpineWidths": 0.09148
+    },
+    {
+      "id": "R32",
+      "column": "R",
+      "order": 32,
+      "endpointsPx": [
+        [
+          688,
+          1344.0
+        ],
+        [
+          1042,
+          1315.0
+        ]
+      ],
+      "centerPx": [
+        865.0,
+        1329.5
+      ],
+      "widthPx": 355.186,
+      "angleDeg": -4.683,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#755e57",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.398,
+      "nextSpacingInSpineWidths": 0.08558
+    },
+    {
+      "id": "R33",
+      "column": "R",
+      "order": 33,
+      "endpointsPx": [
+        [
+          688,
+          1374.37
+        ],
+        [
+          1042,
+          1345.63
+        ]
+      ],
+      "centerPx": [
+        865.0,
+        1360.0
+      ],
+      "widthPx": 355.164,
+      "angleDeg": -4.64,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#543432",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 25.052,
+      "nextSpacingInSpineWidths": 0.07054
+    },
+    {
+      "id": "R34",
+      "column": "R",
+      "order": 34,
+      "endpointsPx": [
+        [
+          681,
+          1400.15
+        ],
+        [
+          1040,
+          1370.85
+        ]
+      ],
+      "centerPx": [
+        860.5,
+        1385.5
+      ],
+      "widthPx": 360.194,
+      "angleDeg": -4.667,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#8499b0",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.097,
+      "nextSpacingInSpineWidths": 0.08911
+    },
+    {
+      "id": "R35",
+      "column": "R",
+      "order": 35,
+      "endpointsPx": [
+        [
+          683,
+          1432.0
+        ],
+        [
+          1043,
+          1403.0
+        ]
+      ],
+      "centerPx": [
+        863.0,
+        1417.5
+      ],
+      "widthPx": 361.166,
+      "angleDeg": -4.606,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#aa7364",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.401,
+      "nextSpacingInSpineWidths": 0.08418
+    },
+    {
+      "id": "R36",
+      "column": "R",
+      "order": 36,
+      "endpointsPx": [
+        [
+          685,
+          1463.0
+        ],
+        [
+          1041,
+          1433.0
+        ]
+      ],
+      "centerPx": [
+        863.0,
+        1448.0
+      ],
+      "widthPx": 357.262,
+      "angleDeg": -4.817,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#884d41",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 30.308,
+      "nextSpacingInSpineWidths": 0.08483
+    },
+    {
+      "id": "R37",
+      "column": "R",
+      "order": 37,
+      "endpointsPx": [
+        [
+          683,
+          1493.0
+        ],
+        [
+          1041,
+          1464.0
+        ]
+      ],
+      "centerPx": [
+        862.0,
+        1478.5
+      ],
+      "widthPx": 359.173,
+      "angleDeg": -4.631,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#343133",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 32.273,
+      "nextSpacingInSpineWidths": 0.08985
+    },
+    {
+      "id": "R38",
+      "column": "R",
+      "order": 38,
+      "endpointsPx": [
+        [
+          681,
+          1525.0
+        ],
+        [
+          1040,
+          1497.0
+        ]
+      ],
+      "centerPx": [
+        860.5,
+        1511.0
+      ],
+      "widthPx": 360.09,
+      "angleDeg": -4.46,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#322b2b",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 29.372,
+      "nextSpacingInSpineWidths": 0.08157
+    },
+    {
+      "id": "R39",
+      "column": "R",
+      "order": 39,
+      "endpointsPx": [
+        [
+          682,
+          1552.06
+        ],
+        [
+          1038,
+          1528.94
+        ]
+      ],
+      "centerPx": [
+        860.0,
+        1540.5
+      ],
+      "widthPx": 356.75,
+      "angleDeg": -3.716,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#827f7e",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 34.363,
+      "nextSpacingInSpineWidths": 0.09632
+    },
+    {
+      "id": "R40",
+      "column": "R",
+      "order": 40,
+      "endpointsPx": [
+        [
+          680,
+          1588.0
+        ],
+        [
+          1038,
+          1562.0
+        ]
+      ],
+      "centerPx": [
+        859.0,
+        1575.0
+      ],
+      "widthPx": 358.943,
+      "angleDeg": -4.154,
+      "angleMethod": "visually traced endpoints",
+      "angleUncertaintyDeg": 0.7,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#36302b",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": 24.11,
+      "nextSpacingInSpineWidths": 0.06717
+    },
+    {
+      "id": "R41",
+      "column": "R",
+      "order": 41,
+      "endpointsPx": [
+        [
+          671,
+          1611.31
+        ],
+        [
+          1038,
+          1587.69
+        ]
+      ],
+      "centerPx": [
+        854.5,
+        1599.5
+      ],
+      "widthPx": 367.759,
+      "angleDeg": -3.682,
+      "angleMethod": "nearby detected plastic edges",
+      "angleUncertaintyDeg": 0.4,
+      "positionUncertaintyPx": 3,
+      "paperColor": "#b3aa9f",
+      "leanDeg": 0,
+      "leanSource": "Hidden out-of-plane tilt cannot be measured from a single image; upright is the baseline.",
+      "nextCenterSpacingPx": null,
+      "nextSpacingInSpineWidths": null
+    }
+  ]
+}

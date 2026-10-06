@@ -1,4 +1,4 @@
-import {mountCollection} from './collection-scene.js?v=browse-1';
+import {mountCollection} from './collection-scene.js?v=measured-1';
 import {attachCaseControls} from './viewer.js?v=lift-1';
 const canvas=document.querySelector('#collection-canvas');
 const hitLayer=document.querySelector('#case-targets');
@@ -113,10 +113,27 @@ function layoutTargets(points){
 }
 async function load(){
   try{
-    const response=await fetch('./mixtapes/mixtapes.json',{cache:'no-store'});if(!response.ok)throw Error('Could not load mixtapes.');
-    const data=await response.json();if(!Array.isArray(data.mixtapes))throw Error('Invalid mixtape list.');
+    const [response,reference]=await Promise.all([fetch('./mixtapes/mixtapes.json',{cache:'no-store'}),fetch('./mixtapes/reference-layout.json?v=measured-1')]);
+    if(!response.ok||!reference.ok)throw Error('Could not load the mixtapes and measured layout.');
+    const [data,layout]=await Promise.all([response.json(),reference.json()]);if(!Array.isArray(data.mixtapes))throw Error('Invalid mixtape list.');
     const entries=data.mixtapes.map(entry).sort((a,b)=>b.date.localeCompare(a.date));
-    const count=Math.max(48,Math.ceil(entries.length/2)*2),positions=[5,...Array.from({length:count},(_,i)=>i).filter(i=>i!==5)];
+    // Preserve the 85 traced slots. Future additions beyond the photograph
+    // extend its last rows explicitly; they are never presented as measurements.
+    const originalBottom=layout.boundsPx[3];
+    while(layout.spines.length<entries.length){
+      const column=layout.columns.L<=layout.columns.R?'L':'R';
+      const tail=layout.spines.filter(spine=>spine.column===column).at(-1);
+      const step=layout.medianCenterSpacingPx;
+      const next={...tail,id:`${column}${++layout.columns[column]}`,order:layout.columns[column],
+        centerPx:[tail.centerPx[0],tail.centerPx[1]+step],
+        endpointsPx:tail.endpointsPx.map(([x,y])=>[x,y+step]),
+        leanDeg:0,leanSource:'Unmeasured extension beyond the reference photograph.',
+        angleMethod:'Extrapolated from the final measured spine in this column.',measurementStatus:'extrapolated',
+        angleUncertaintyDeg:null,positionUncertaintyPx:null,nextCenterSpacingPx:null,nextSpacingInSpineWidths:null};
+      layout.spines.push(next);layout.boundsPx[3]=Math.max(layout.boundsPx[3],next.centerPx[1]+step);
+    }
+    if(layout.boundsPx[3]>originalBottom)layout.boxOutlinePx=layout.boxOutlinePx.map(([x,y])=>[x,y>originalBottom-40?y+layout.boundsPx[3]-originalBottom:y]);
+    const count=layout.spines.length,positions=[5,...Array.from({length:count},(_,i)=>i).filter(i=>i!==5)];
     const filled=new Map(entries.map((tape,i)=>[positions[i],tape]));
     const slots=Array.from({length:count},(_,i)=>filled.get(i)||{title:'',label:'',tracks:[],blank:true});
     slots.forEach((tape,i)=>{
@@ -125,7 +142,7 @@ async function load(){
       button.addEventListener('click',()=>viewer?.pick(i));hitLayer.append(button);
     });
     document.querySelector('#collection-count').textContent=`${String(entries.length).padStart(2,'0')} ${entries.length===1?'MIX':'MIXES'} / ${count-entries.length} EMPTY CASES`;
-    viewer=await mountCollection(canvas,slots,{onPick,onReady,onReturn,onProgress:()=>{},onLayout:layoutTargets});
+    viewer=await mountCollection(canvas,slots,{layout,onPick,onReady,onReturn,onProgress:()=>{},onLayout:layoutTargets});
     hitLayer.querySelectorAll('button').forEach(button=>button.disabled=false);note.textContent='Scroll to browse. Click a spine to pick it up.';
   }catch(error){
     console.error(error);note.textContent='The 3D box could not load. Refresh to try again.';

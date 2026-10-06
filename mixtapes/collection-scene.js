@@ -3,7 +3,7 @@ import {createCase} from './case-model.js?v=lift-1';
 
 const ease=t=>t*t*t*(t*(t*6-15)+10);
 const clamp=THREE.MathUtils.clamp;
-export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onProgress,onLayout,onBrowse=()=>{}}){
+export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onProgress,onLayout,layout,onBrowse=()=>{}}){
   const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.85;
   const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(33,1,.01,80);
@@ -16,41 +16,36 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   const pmrem=new THREE.PMREMGenerator(renderer),env=pmrem.fromScene(room,.08);scene.environment=env.texture;pmrem.dispose();room.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});
   const storage=new THREE.Group();scene.add(storage);
   const blank=await createCase(renderer,{title:'',label:'',tracks:[],blank:true});
-  const rows=slots.length/2,spacing=.209;
+  const units=layout.worldUnitsPerPixel,thickness=layout.caseThicknessScale;
+  const [left,top,right,bottom]=layout.boundsPx,cx=(left+right)/2,cy=(top+bottom)/2;
+  const width=(right-left)*units,depth=(bottom-top)*units,spacing=layout.medianCenterSpacingPx*units;
+  const spineHeight=1.5;
   const standing=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(new THREE.Vector3(0,-1,0),new THREE.Vector3(0,0,-1),new THREE.Vector3(1,0,0)));
-  const palette=['#e4ddc8','#454a46','#b89b94','#d9d5c6','#78858a','#c3b28d','#454a46','#8ea9ac'];
-  // Small irregular stacks, with different breaks in each column. The room
-  // between cases accommodates their real GLB thickness when they lean.
-  const noise=i=>{const x=Math.sin(i*127.1+73.7)*43758.5453;return x-Math.floor(x);};
-  const offsets=Array.from({length:2},(_,column)=>{
-    let z=column?.13:0;
-    return Array.from({length:rows},(_,row)=>{
-      if(row)z+=spacing+noise(row+column*rows)*.018;
-      if((column===0&&[4,11,19].includes(row))||(column===1&&[7,16].includes(row)))z+=column?.18:.12;
-      return z;
-    });
-  });
-  const last=Math.max(...offsets.flat()),depth=last+.42;
   const firstFilled=slots.findIndex(tape=>!tape.blank);
-  let browsePosition=firstFilled<0?0:firstFilled,browseTarget=browsePosition,browseRAF=0,browseTime=0;
+  const initialFocus=firstFilled<0?0:firstFilled;
+  let browsePosition=initialFocus,browseTarget=browsePosition,browseRAF=0,browseTime=0,browseMix=0,browseMixTarget=0;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  // Every base pose comes from a traced line in the photograph. Image-plane
+  // coordinates preserve perspective already present in that photograph.
+  // The common thickness calibration applies to BOTH stored and lifted GLBs.
+  blank.pack.scale.y=thickness;
   const items=slots.map((tape,index)=>{
-    const column=index<rows?0:1,row=index%rows,side=column?1:-1;
-    const basePosition=new THREE.Vector3(side*.681+(noise(index+10)-.5)*.034,.769+noise(index+20)*.036,offsets[column][row]-last/2);
-    const cluster=Math.floor((row+(column?2:0))/5),sign=cluster%2?-1:1;
-    const restYaw=sign*(.036+noise(index+30)*.019),restLean=.034+noise(index+40)*.017,restRoll=side*(.011+noise(index+50)*.009);
-    return {tape,index,basePosition,restYaw,restLean,restRoll,side,position:basePosition.clone(),quaternion:standing.clone(),matrix:new THREE.Matrix4(),color:new THREE.Color(palette[(index*13+Math.floor(index/3))%palette.length])};
+    const measured=layout.spines[index],side=measured.column==='L'?-1:1;
+    const uniformScale=measured.widthPx*units/1.25;
+    const modelScale=new THREE.Vector3(uniformScale,uniformScale*thickness,uniformScale);
+    const baseQuaternion=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),-THREE.MathUtils.degToRad(measured.angleDeg))
+      .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),THREE.MathUtils.degToRad(measured.leanDeg||0))).multiply(standing);
+    const anchor=new THREE.Vector3((measured.centerPx[0]-cx)*units,spineHeight,(measured.centerPx[1]-cy)*units);
+    const basePosition=anchor.clone().sub(new THREE.Vector3(-.716,.052,0).multiply(modelScale).applyQuaternion(baseQuaternion));
+    return {tape,index,measured,side,uniformScale,modelScale,basePosition,baseQuaternion,position:basePosition.clone(),quaternion:baseQuaternion.clone(),matrix:new THREE.Matrix4(),color:new THREE.Color(measured.paperColor)};
   });
   function browsePose(item){
-    const distance=item.index-browsePosition,focus=Math.exp(-Math.pow(distance/.64,2));
-    const nearby=Math.exp(-Math.pow(distance/2.3,2)),passed=-Math.tanh(distance*1.8);
-    item.position.copy(item.basePosition);
-    item.position.y+=.29*focus+.035*nearby*(1-focus);
-    item.position.x+=item.side*.009*nearby*(1-focus);
-    const yaw=(item.restYaw+passed*.018*nearby)*(1-focus);
-    const lean=item.restLean*(1-focus),roll=(item.restRoll+item.side*.014*nearby)*(1-focus);
-    item.quaternion.setFromEuler(new THREE.Euler(lean,yaw,roll,'YXZ')).multiply(standing);
-    item.matrix.compose(item.position,item.quaternion,new THREE.Vector3(1,1,1));
+    const distance=item.index-browsePosition,focus=Math.exp(-Math.pow(distance/.64,2))*browseMix;
+    const nearby=Math.exp(-Math.pow(distance/2.3,2))*browseMix;
+    item.position.copy(item.basePosition);item.position.y+=.25*focus;
+    item.quaternion.copy(item.baseQuaternion).slerp(standing,focus);
+    item.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),item.side*.012*nearby*(1-focus)));
+    item.matrix.compose(item.position,item.quaternion,new THREE.Vector3().setScalar(item.uniformScale));
     item.focus=focus;
   }
   items.forEach(browsePose);
@@ -69,18 +64,19 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     storage.add(mesh);batches.push(mesh);
   });
   for(const item of items.filter(item=>!item.tape.blank)){
-    item.model=await createCase(renderer,item.tape);item.model.pack.position.copy(item.position);item.model.pack.quaternion.copy(item.quaternion);storage.add(item.model.pack);
+    item.model=await createCase(renderer,item.tape);item.model.pack.scale.copy(item.modelScale);item.model.pack.position.copy(item.position);item.model.pack.quaternion.copy(item.quaternion);storage.add(item.model.pack);
   }
-  // A shallow, open cardboard crate; cases stand above its rim.
+  // Trace the visible, bowed box outline too. No divider is visible in the photo.
   const cardboard=new THREE.MeshStandardMaterial({color:0xaf895d,roughness:1});
   const inner=new THREE.MeshStandardMaterial({color:0x9c794e,roughness:1});
-  function wall(w,h,d,x,y,z,material=cardboard){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);storage.add(m);return m;}
-  wall(2.79,.055,depth,0,-.007,0,inner);
-  wall(.045,1.16,depth,-1.39,.55,0);wall(.045,1.16,depth,1.39,.55,0);
-  wall(2.82,1.16,.045,0,.55,-depth/2);wall(2.82,1.16,.045,0,.55,depth/2);
-  wall(.024,.91,depth-.05,0,.44,0,inner);
-  // Thin corrugated rims preserve the box reference without a separate CSS frame.
-  wall(.052,.018,depth,-1.39,1.135,0);wall(.052,.018,depth,1.39,1.135,0);
+  const outline=layout.boxOutlinePx.map(([x,y])=>new THREE.Vector2((x-cx)*units,(y-cy)*units));
+  const shape=new THREE.Shape();outline.forEach((point,i)=>i?shape.lineTo(point.x,-point.y):shape.moveTo(point.x,-point.y));shape.closePath();
+  const floor=new THREE.Mesh(new THREE.ShapeGeometry(shape),inner);floor.rotation.x=-Math.PI/2;floor.position.y=-.015;storage.add(floor);
+  outline.forEach((point,i)=>{
+    const end=outline[(i+1)%outline.length],dx=end.x-point.x,dz=end.y-point.y;
+    const wall=new THREE.Mesh(new THREE.BoxGeometry(Math.hypot(dx,dz),1.5,.025),cardboard);
+    wall.position.set((point.x+end.x)/2,.74,(point.y+end.y)/2);wall.rotation.y=-Math.atan2(dz,dx);storage.add(wall);
+  });
   const backgroundMaterials=new Map();storage.traverse(o=>{if(o.material&&!backgroundMaterials.has(o.material))backgroundMaterials.set(o.material,{opacity:o.material.opacity,depthWrite:o.material.depthWrite,transparent:o.material.transparent});});
   // Compile both the instanced rack and ordinary mesh path before the first lift.
   const warm=blank.pack.clone(true);warm.visible=true;warm.position.set(0,-50,0);scene.add(warm);
@@ -99,18 +95,19 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   }
   function placeCamera(){
     const fov=THREE.MathUtils.degToRad(camera.fov/2);
-    const distance=Math.max((depth+.25)/(2*Math.tan(fov)),3.05/(2*Math.tan(fov)*camera.aspect))*1.08;
-    const center=new THREE.Vector3(0,.85,0);
-    camera.position.copy(center).addScaledVector(new THREE.Vector3(0,1,.14).normalize(),distance);camera.lookAt(center);camera.updateMatrixWorld();
+    const distance=Math.max(depth/(2*Math.tan(fov)),width/(2*Math.tan(fov)*camera.aspect))*1.075;
+    // A plan-view camera reproduces the measured 2D geometry exactly. Camera
+    // perspective in the source is retained in the traced centers and spans.
+    camera.up.set(0,0,-1);camera.position.set(0,spineHeight+distance,0);camera.lookAt(0,spineHeight,0);camera.updateMatrixWorld();
     homeCamera.copy(camera.position);homeQuaternion.copy(camera.quaternion);
   }
   function targets(){
     const r=canvas.getBoundingClientRect();
     const screen=point=>{point.project(camera);return {x:(point.x+1)*r.width/2,y:(1-point.y)*r.height/2};};
     const points=items.map(item=>{
-      const center=screen(new THREE.Vector3(-.716,.052,0).applyMatrix4(item.matrix));
-      const left=screen(new THREE.Vector3(-.716,.052,-.625).applyMatrix4(item.matrix));
-      const right=screen(new THREE.Vector3(-.716,.052,.625).applyMatrix4(item.matrix));
+      const center=screen(new THREE.Vector3(-.716,.052*thickness,0).applyMatrix4(item.matrix));
+      const left=screen(new THREE.Vector3(-.716,.052*thickness,-.625).applyMatrix4(item.matrix));
+      const right=screen(new THREE.Vector3(-.716,.052*thickness,.625).applyMatrix4(item.matrix));
       return {index:item.index,x:center.x,y:center.y,width:Math.hypot(right.x-left.x,right.y-left.y),height:Math.max(14,r.height*spacing/(depth+.6)*.7),angle:Math.atan2(right.y-left.y,right.x-left.x)*180/Math.PI,focused:Math.round(browsePosition)===item.index};
     });onLayout(points);
   }
@@ -127,16 +124,19 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   function browseFrame(time){
     browseRAF=0;if(state!=='box')return;
     const dt=Math.min(50,time-browseTime||16.7);browseTime=time;
-    browsePosition+=(browseTarget-browsePosition)*(1-Math.exp(-dt/95));
+    const blend=1-Math.exp(-dt/95);
+    browsePosition+=(browseTarget-browsePosition)*blend;
+    browseMix+=(browseMixTarget-browseMix)*blend;
+    if(Math.abs(browseMixTarget-browseMix)<.002)browseMix=browseMixTarget;
     if(Math.abs(browseTarget-browsePosition)<.002)browsePosition=browseTarget;
     updateBrowse();
-    if(browsePosition!==browseTarget)browseRAF=requestAnimationFrame(browseFrame);
+    if(browsePosition!==browseTarget||browseMix!==browseMixTarget)browseRAF=requestAnimationFrame(browseFrame);
   }
   function browseTo(index){
     if(state!=='box')return false;
     const next=clamp(index,0,items.length-1);if(next===browseTarget)return false;
-    browseTarget=next;
-    if(reduced.matches){browsePosition=browseTarget;updateBrowse();}
+    browseTarget=next;browseMixTarget=1;
+    if(reduced.matches){browsePosition=browseTarget;browseMix=browseMixTarget;updateBrowse();}
     else if(!browseRAF){browseTime=performance.now();browseRAF=requestAnimationFrame(browseFrame);}
     return true;
   }
@@ -167,7 +167,10 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   surface.addEventListener('click',event=>{if(suppressClick){suppressClick=false;event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
   surface.addEventListener('keydown',event=>{
     if(state!=='box')return;
-    const steps={ArrowDown:1,ArrowUp:-1,ArrowLeft:-rows,ArrowRight:rows};
+    const current=items[Math.round(browseTarget)];
+    const acrossColumn=event.key==='ArrowLeft'?'L':'R';
+    const across=items.find(item=>item.measured.column===acrossColumn&&item.measured.order===Math.min(current.measured.order,layout.columns[acrossColumn]));
+    const steps={ArrowDown:1,ArrowUp:-1,ArrowLeft:across?across.index-current.index:0,ArrowRight:across?across.index-current.index:0};
     let next;if(event.key in steps)next=Math.round(browseTarget)+steps[event.key];else if(event.key==='Home')next=0;else if(event.key==='End')next=items.length-1;else return;
     event.preventDefault();next=clamp(next,0,items.length-1);browseTo(next);
     surface.querySelectorAll('.case-hit')[next]?.focus({preventScroll:true});
@@ -175,11 +178,11 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   function resize(){
     const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;
     renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();
-    const previousPosition=camera.position.clone(),previousQuaternion=camera.quaternion.clone();
+    const previousPosition=camera.position.clone(),previousQuaternion=camera.quaternion.clone(),previousUp=camera.up.clone();
     placeCamera();
     if(state==='box'){targets();draw();}
     else {
-      camera.position.copy(previousPosition);camera.quaternion.copy(previousQuaternion);camera.updateMatrixWorld();
+      camera.position.copy(previousPosition);camera.quaternion.copy(previousQuaternion);camera.up.copy(previousUp);camera.updateMatrixWorld();
       if(motion){
         if(motion.returning){motion.endCamera.copy(homeCamera);motion.endCameraQ.copy(homeQuaternion);}
         else Object.assign(motion,detailPose());
@@ -197,7 +200,7 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     if(!item.tape.blank)return item.model;
     const pack=blank.pack.clone(true),materials=[];
     pack.traverse(o=>{if(!o.isMesh)return;o.material=o.material.clone();materials.push(o.material);if(o.name.includes('Label'))o.material.color.multiply(item.color);});
-    pack.position.copy(item.position);pack.quaternion.copy(item.quaternion);
+    pack.scale.copy(item.modelScale);pack.position.copy(item.position);pack.quaternion.copy(item.quaternion);
     setInstance(item,false);
     return {...blank,pack,hinge:pack.getObjectByName('Lid_Hinge'),tape:item.tape,dispose:()=>materials.forEach(m=>m.dispose())};
   }
@@ -208,7 +211,7 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     const sphere=new THREE.Box3().setFromObject(pack).getBoundingSphere(new THREE.Sphere());
     const distance=sphere.radius/Math.sin(THREE.MathUtils.degToRad(camera.fov/2))*1.06/Math.min(1,camera.aspect);
     const direction=new THREE.Vector3(...(active.tape.tracks?.length?[.3,4,1.5]:[.9,2.9,2.7])).normalize();
-    const endCamera=sphere.center.clone().addScaledVector(direction,distance),testCamera=camera.clone();testCamera.position.copy(endCamera);testCamera.lookAt(sphere.center);
+    const endCamera=sphere.center.clone().addScaledVector(direction,distance),testCamera=camera.clone();testCamera.position.copy(endCamera);testCamera.up.set(0,1,0);testCamera.lookAt(sphere.center);
     pack.position.copy(oldP);pack.quaternion.copy(oldQ);pack.updateMatrixWorld(true);
     return {endP,endQ,endCamera,endCameraQ:testCamera.quaternion.clone()};
   }
@@ -216,10 +219,10 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   function pick(index){
     if(state!=='box')return;
     const item=items[index];if(!item)return;
-    cancelAnimationFrame(browseRAF);browseRAF=0;clearTimeout(wheelRest);browseTarget=browsePosition;
+    cancelAnimationFrame(browseRAF);browseRAF=0;clearTimeout(wheelRest);browseTarget=browsePosition;browseMixTarget=browseMix;
     active=item;active.model=promote(item);scene.attach(active.model.pack);
     onPick(item.tape,index);setState('lifting');
-    const end=detailPose();
+    camera.up.set(0,1,0);const end=detailPose();
     motion={start:performance.now(),duration:1100,fromP:item.position.clone(),fromQ:item.quaternion.clone(),fromCamera:camera.position.clone(),fromCameraQ:camera.quaternion.clone(),...end,returning:false};
     tick(performance.now());
   }
@@ -265,10 +268,10 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     }
     draw();
   }
-  reduced.addEventListener('change',()=>{if(motion)finishMotion();if(reduced.matches&&state==='box'){cancelAnimationFrame(browseRAF);browseRAF=0;browsePosition=browseTarget;updateBrowse();}});
+  reduced.addEventListener('change',()=>{if(motion)finishMotion();if(reduced.matches&&state==='box'){cancelAnimationFrame(browseRAF);browseRAF=0;browsePosition=browseTarget;browseMix=browseMixTarget;updateBrowse();}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&motion)finishMotion();});
   canvas.dataset.ready='true';canvas.dataset.state='box';updateBrowse();
-  const api={pick,putBack,browseTo,browseBy,get browsePosition(){return browsePosition;},get browseTarget(){return browseTarget;},renderer,scene,camera,items,get active(){return active;},get state(){return state;}};
+  const api={layout,thickness,pick,putBack,browseTo,browseBy,get browsePosition(){return browsePosition;},get browseTarget(){return browseTarget;},renderer,scene,camera,items,get active(){return active;},get state(){return state;}};
   canvas.collectionViewer=api;
   return api;
 }
