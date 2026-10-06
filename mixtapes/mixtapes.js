@@ -1,8 +1,8 @@
-const section=document.querySelector('#mixtapes');
 const grid=document.querySelector('#mixtape-grid');
 const note=document.querySelector('#mixtape-note');
-const pager=document.querySelector('#mixtape-pagination');
-let entries=[],page=0,disposers=[],generation=0;
+const collection=document.querySelector('#cd-box');
+const dialog=document.querySelector('#case-dialog');
+let entries=[],disposers=[],generation=0;
 const dateFormat=new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric',timeZone:'UTC'});
 function entry(row){
   let label=String(row.dateLabel||'UNDATED').slice(0,40);
@@ -18,9 +18,9 @@ function entry(row){
   const cover=typeof row.cover==='string'&&/^assets\/mixtapes\/[\w.-]+\.(png|webp|jpg)$/.test(row.cover)?row.cover:null;
   return {title:String(row.displayTitle||row.title||'Weekly mixtape').slice(0,160),date:row.date||'',label,url:url.href,playlistId:url.pathname.split('/')[2],embed:row.embed===true,tracks,cover};
 }
-async function showPage(){
+async function showTape(tape){
   const version=++generation;disposers.forEach(dispose=>dispose());disposers=[];grid.replaceChildren();
-  const list=entries.length?entries.slice(page*3,page*3+3):[{title:'Weekly mixtape',label:'DATE / ____',preview:true}];
+  const list=[tape];
   grid.classList.toggle('is-single',list.length===1);
   const jobs=list.map(async tape=>{
     const card=document.createElement('article');card.className='mixtape-card';
@@ -83,20 +83,73 @@ async function showPage(){
     actions.querySelector('a')?.addEventListener('click',event=>{if(!caseOpen)event.preventDefault();});
     setCaseOpen(false);
     try{const {mountCase}=await import('./viewer.js?v=spine-1');if(version!==generation)return;const dispose=await mountCase(canvas,button,tape,selectTrack,setCaseOpen,syncView);if(version!==generation)dispose();else disposers.push(dispose);}
-    catch(error){console.warn('Mixtape model unavailable',error);card.classList.add('is-fallback');zoomControls.hidden=true;card.querySelectorAll('.mixtape-song-zoom').forEach(control=>control.hidden=true);canvas.hidden=true;button.disabled=false;fallback.hidden=false;fallback.textContent='3D preview unavailable. Open the case below to browse the songs.';button.addEventListener('click',()=>{setCaseOpen(!caseOpen);button.textContent=caseOpen?'Close case':'Open case';button.setAttribute('aria-expanded',String(caseOpen));if(caseOpen)card.querySelector('details')?.setAttribute('open','');});if(tape.preview)fallback.textContent='3D preview unavailable. Refresh to try again.';}
+    catch(error){if(version!==generation)return;console.warn('Mixtape model unavailable',error);card.classList.add('is-fallback');zoomControls.hidden=true;card.querySelectorAll('.mixtape-song-zoom').forEach(control=>control.hidden=true);canvas.hidden=true;button.disabled=false;fallback.hidden=false;fallback.textContent='3D preview unavailable. Open the case below to browse the songs.';button.addEventListener('click',()=>{setCaseOpen(!caseOpen);button.textContent=caseOpen?'Close case':'Open case';button.setAttribute('aria-expanded',String(caseOpen));if(caseOpen)card.querySelector('details')?.setAttribute('open','');});if(tape.preview)fallback.textContent='3D preview unavailable. Refresh to try again.';}
   });
-  pager.hidden=entries.length<=3;
-  document.querySelector('#mixtape-prev').disabled=page===0;
-  document.querySelector('#mixtape-next').disabled=(page+1)*3>=entries.length;
-  document.querySelector('#mixtape-page').textContent=`${page+1} / ${Math.max(1,Math.ceil(entries.length/3))}`;
   await Promise.all(jobs);
 }
-document.querySelector('#mixtape-prev').addEventListener('click',()=>{if(page>0){page--;void showPage();}});
-document.querySelector('#mixtape-next').addEventListener('click',()=>{if((page+1)*3<entries.length){page++;void showPage();}});
-const observer=new IntersectionObserver(async records=>{
-  if(!records.some(r=>r.isIntersecting))return;observer.disconnect();
-  try{const response=await fetch('./mixtapes/mixtapes.json',{cache:'no-store'});if(!response.ok)throw Error('Could not load the mixtape list.');const data=await response.json();if(!Array.isArray(data.mixtapes))throw Error('Mixtape list is invalid.');entries=data.mixtapes.map(entry).sort((a,b)=>b.date.localeCompare(a.date));
-    note.textContent=entries.length?'Open the case to pick a song. Scroll to zoom; drag to turn.':'The first case is a preview. Your playlists and dates will fill the collection.';
-  }catch(error){note.textContent=error.message;}
-  void showPage();
-},{rootMargin:'200px'});observer.observe(section);
+
+function clearViewer(){
+  generation++;
+  disposers.forEach(dispose=>dispose());disposers=[];
+  grid.replaceChildren();
+}
+function openTape(tape){
+  document.querySelector('#mixtapes-title').textContent=tape.title;
+  note.textContent='Open the case to pick a song. Scroll to zoom; drag to turn.';
+  dialog.showModal();
+  document.body.classList.add('case-is-out');
+  void showTape(tape);
+}
+document.querySelector('#return-case').addEventListener('click',()=>dialog.close());
+dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close();});
+dialog.addEventListener('close',()=>{clearViewer();document.body.classList.remove('case-is-out');});
+
+// Empty cases are visual slots, never fabricated playlist records. New JSON
+// entries fill these slots automatically; the box grows beyond 48 when needed.
+function fillBox(){
+  collection.replaceChildren();
+  const count=Math.max(48,Math.ceil(entries.length/2)*2);
+  const columns=Array.from({length:2},()=>{
+    const column=document.createElement('div');column.className='cd-column';
+    collection.append(column);return column;
+  });
+  const colors=['chalk','charcoal','rose','chalk','slate','sand','charcoal','blue','chalk','olive','rose','charcoal'];
+  const positions=[5,...Array.from({length:count},(_,i)=>i).filter(i=>i!==5)];
+  const filled=new Map(entries.map((tape,i)=>[positions[i],tape]));
+  let colorSeed=73;
+  for(let i=0;i<count;i++){
+    colorSeed=(Math.imul(colorSeed,1664525)+1013904223)>>>0;
+    const tape=filled.get(i);
+    const spine=document.createElement(tape?'button':'div');
+    spine.className=`cd-spine ${tape?'is-filled':'is-empty'} tone-${colors[(colorSeed>>>16)%colors.length]}`;
+    spine.style.setProperty('--lean',`${((i*13)%9-4)*.18}deg`);
+    spine.style.setProperty('--nudge',`${(i*7)%5-2}px`);
+    spine.style.setProperty('--shorten',`${(i*3)%8}px`);
+    const paper=document.createElement('span');paper.className='spine-paper';spine.append(paper);
+    if(tape){
+      spine.type='button';spine.setAttribute('aria-label',`Take out ${tape.title}, ${tape.label}`);
+      spine.setAttribute('aria-haspopup','dialog');
+      const title=document.createElement('span');title.className='spine-title';title.textContent=tape.title;
+      const date=document.createElement('span');date.className='spine-date';date.textContent=tape.label;
+      paper.append(title,date);spine.addEventListener('click',()=>openTape(tape));
+    }else spine.setAttribute('aria-hidden','true');
+    columns[Math.floor(i/(count/2))].append(spine);
+  }
+  const empty=count-entries.length;
+  document.querySelector('#collection-count').textContent=`${String(entries.length).padStart(2,'0')} ${entries.length===1?'MIX':'MIXES'} / ${empty} EMPTY CASES`;
+  document.querySelector('#collection-note').textContent=entries.length?'Pull out a labeled spine to listen.':'Room for friends’ recommendations.';
+}
+async function loadCollection(){
+  try{
+    const response=await fetch('./mixtapes/mixtapes.json',{cache:'no-store'});
+    if(!response.ok)throw Error('Could not load the mixtape list.');
+    const data=await response.json();
+    if(!Array.isArray(data.mixtapes))throw Error('Mixtape list is invalid.');
+    entries=data.mixtapes.map(entry).sort((a,b)=>b.date.localeCompare(a.date));
+    fillBox();
+  }catch(error){
+    fillBox();document.querySelector('#collection-note').textContent='The mixtapes could not load. Please refresh to try again.';
+    console.warn(error);
+  }
+}
+void loadCollection();

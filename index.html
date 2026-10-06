@@ -1,12 +1,21 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mixed by Anvitha</title><meta name="description" content="Six songs, kept in a little CD case. Open to listen."><meta name="theme-color" content="#f6f5e9"><meta name="robots" content="noindex">
+<title>Mixed by Anvitha</title><meta name="description" content="A box of friends’ mixtapes. Pull out a CD and open it to listen."><meta name="theme-color" content="#f6f5e9"><meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23bac3bc'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23f6f5e9'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%23102d22'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="mixtapes/mixtapes.css?v=spine-1"><link rel="stylesheet" href="page.css?v=spine-1">
+<link rel="stylesheet" href="mixtapes/mixtapes.css?v=box-1"><link rel="stylesheet" href="page.css?v=box-1">
+<link rel="stylesheet" href="collection.css?v=box-1">
 <script type="importmap">{"imports":{"three":"./prototypes/waves/vendor/three.module.js"}}</script></head>
-<body><main><section class="mixtapes" id="mixtapes" aria-labelledby="mixtapes-title">
-<header class="mixtapes-header"><h1 id="mixtapes-title">Mixed by Anvitha</h1><p id="mixtape-note">Open the case to listen.</p></header>
+<body><main>
+<section class="collection" aria-labelledby="collection-title">
+<header class="collection-header"><div><p class="collection-eyebrow">PASSED FROM FRIEND TO FRIEND</p><h1 id="collection-title">The mixtape box</h1></div><p id="collection-note" role="status">Finding the first mix…</p></header>
+<div class="box-wrap"><div class="cd-box" id="cd-box" aria-label="Two columns of CD cases"></div></div>
+<footer class="collection-footer"><span id="collection-count"></span><span>Room for a few more favorites.</span></footer>
+</section>
+<dialog id="case-dialog" aria-labelledby="mixtapes-title"><div class="case-sheet">
+<button id="return-case" type="button" autofocus>← Back to the box</button>
+<section class="mixtapes" id="mixtapes" aria-labelledby="mixtapes-title">
+<header class="mixtapes-header"><h2 id="mixtapes-title">Mixed by Anvitha</h2><p id="mixtape-note">Open the case to listen.</p></header>
 <div class="mixtape-grid" id="mixtape-grid"></div>
-<nav class="mixtape-pagination" id="mixtape-pagination" aria-label="Mixtape pages" hidden><button id="mixtape-prev" type="button">Newer</button><span id="mixtape-page"></span><button id="mixtape-next" type="button">Older</button></nav>
+</section></div></dialog>
 <noscript><p>Enable JavaScript to open the case, or <a href="https://open.spotify.com/playlist/6VWaYZbC9La3vbG2qIywXq">listen on Spotify</a>.</p></noscript>
-</section></main><script type="module" src="mixtapes/mixtapes.js?v=spine-1"></script></body></html>
+</main><script type="module" src="mixtapes/mixtapes.js?v=box-1"></script></body></html>
