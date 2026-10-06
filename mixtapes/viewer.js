@@ -96,6 +96,21 @@ export async function mountCase(canvas,button,tape,onSelect=()=>{},onOpenChange=
     printedDisc=new THREE.Mesh(new THREE.PlaneGeometry(1.2,1.2),material);printedDisc.name='Printed_Tracklist';printedDisc.rotation.x=-Math.PI/2;printedDisc.position.set(.045,.087,0);pack.add(printedDisc);
   }
   if(!hinge)throw Error('Case hinge missing');
+  // Separate front-facing spine strip and outer-edge labels, fixed to the base.
+  const spineCanvas=document.createElement('canvas');spineCanvas.width=1536;spineCanvas.height=112;
+  const spineContext=spineCanvas.getContext('2d');
+  spineContext.fillStyle='#ece4cf';spineContext.fillRect(0,0,1536,112);
+  spineContext.fillStyle='#344638';spineContext.textBaseline='middle';spineContext.font='54px "Selectric Mono",monospace';
+  spineContext.fillText(tape.title,42,57,880);
+  spineContext.textAlign='right';spineContext.font='40px "Selectric Mono",monospace';spineContext.fillText(tape.label,1494,57,480);
+  const spineMap=new THREE.CanvasTexture(spineCanvas);spineMap.colorSpace=THREE.SRGBColorSpace;spineMap.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());textures.push(spineMap);
+  const spineMaterial=new THREE.MeshBasicMaterial({map:spineMap,toneMapped:false,side:THREE.FrontSide});materials.push(spineMaterial);
+  const spineLabels=[];
+  for(const [name,width,height,position,rotation] of [
+    ['Spine_Top_Label',1.12,.078,[-.654,.089,0],[-Math.PI/2,0,Math.PI/2]],
+    ['Spine_Left_Label',1.1,.064,[-.716,.052,0],[0,-Math.PI/2,0]],
+    ['Spine_Right_Label',1.1,.064,[.716,.052,0],[0,Math.PI/2,0]],
+  ]){const mesh=new THREE.Mesh(new THREE.PlaneGeometry(width,height),spineMaterial);mesh.name=name;mesh.position.set(...position);mesh.rotation.set(...rotation);mesh.userData.label=`${tape.title} · ${tape.label}`;pack.add(mesh);spineLabels.push(mesh);}
   let coverPrint;
   if(coverMap){
     coverMap.colorSpace=THREE.SRGBColorSpace;coverMap.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());textures.push(coverMap);
@@ -122,8 +137,10 @@ export async function mountCase(canvas,button,tape,onSelect=()=>{},onOpenChange=
   }
   function viewChanged(){canvas.dataset.zoom=zoom.toFixed(2);canvas.dataset.focusedTrack=focusRegion?.track.uri||'';onViewChange({zoom,track:focusRegion?.track||null});render();}
   function setZoom(value){zoom=THREE.MathUtils.clamp(Number(value)||1,1,4);if(zoom===1){focusRegion=null;viewOffset.set(0,0,0);}viewChanged();}
-  function resetZoom(){focusRegion=null;zoom=1;viewOffset.set(0,0,0);viewChanged();}
-  function focusTrack(uri){if(!canSelect)return;const region=regions.find(r=>r.track.uri===uri);if(!region)return;focusRegion=region;zoom=3.2;viewOffset.set(0,0,0);viewChanged();}
+  function coverDirection(){direction.set(...(tracks.length?[.3,4,1.5]:[.9,2.9,2.7])).normalize();canvas.dataset.view='cover';}
+  function resetZoom(){focusRegion=null;zoom=1;viewOffset.set(0,0,0);coverDirection();viewChanged();}
+  function focusSpine(){focusRegion=null;zoom=1.25;viewOffset.set(0,0,0);direction.set(-3,1.6,1.3).normalize();canvas.dataset.view='spine';viewChanged();}
+  function focusTrack(uri){if(!canSelect)return;const region=regions.find(r=>r.track.uri===uri);if(!region)return;coverDirection();focusRegion=region;zoom=3.2;viewOffset.set(0,0,0);viewChanged();}
   function resize(){const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();render();}
   function pose(angle){hinge.rotation.z=angle;syncOpen();canvas.dataset.open=String(canSelect);render();}
   function settle(){cancelAnimationFrame(raf);animation=null;pose(target);}
@@ -158,6 +175,6 @@ export async function mountCase(canvas,button,tape,onSelect=()=>{},onOpenChange=
   canvas.addEventListener('pointercancel',()=>{drag=null;},{signal:events.signal});
   canvas.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();pack.rotation.y+=(e.key==='ArrowLeft'?-.15:.15);render();}else if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}else if(e.key==='+'||e.key==='='){e.preventDefault();setZoom(zoom+.25);}else if(e.key==='-'){e.preventDefault();setZoom(zoom-.25);}else if(e.key==='Escape'||e.key==='0'){e.preventDefault();resetZoom();}},{signal:events.signal});
   const observer=new ResizeObserver(resize);observer.observe(canvas);resize();canvas.dataset.ready='true';canvas.dataset.label=tape.label;
-  canvas.caseViewer={renderer,model:pack,hinge,render,setZoom,resetZoom,focusTrack,trackPoints:()=>regions.map(r=>{const point=new THREE.Vector3((r.x+70)/1024*1.2-.6+.045,.087,(r.y+50)/1024*1.2-.6);pack.localToWorld(point);point.project(camera);const box=canvas.getBoundingClientRect();return {title:r.track.title,x:box.x+(point.x+1)*box.width/2,y:box.y+(1-point.y)*box.height/2};})};viewChanged();
-  return ()=>{disposed=true;events.abort();observer.disconnect();cancelAnimationFrame(raf);printedDisc?.geometry.dispose();coverPrint?.geometry.dispose();materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());env.texture.dispose();env.dispose();renderer.dispose();};
+  canvas.caseViewer={renderer,model:pack,hinge,render,setZoom,resetZoom,focusSpine,focusTrack,trackPoints:()=>regions.map(r=>{const point=new THREE.Vector3((r.x+70)/1024*1.2-.6+.045,.087,(r.y+50)/1024*1.2-.6);pack.localToWorld(point);point.project(camera);const box=canvas.getBoundingClientRect();return {title:r.track.title,x:box.x+(point.x+1)*box.width/2,y:box.y+(1-point.y)*box.height/2};})};viewChanged();
+  return ()=>{disposed=true;events.abort();observer.disconnect();cancelAnimationFrame(raf);printedDisc?.geometry.dispose();coverPrint?.geometry.dispose();spineLabels.forEach(mesh=>mesh.geometry.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());env.texture.dispose();env.dispose();renderer.dispose();};
 }

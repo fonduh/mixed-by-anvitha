@@ -38,12 +38,13 @@ async function showPage(){
     const zoomMore=document.createElement('button');zoomMore.type='button';zoomMore.textContent='+';zoomMore.setAttribute('aria-label','Zoom in');
     const zoomReset=document.createElement('button');zoomReset.type='button';zoomReset.textContent='Reset view';
     const zoomStatus=document.createElement('span');zoomStatus.className='mixtape-zoom-status';zoomStatus.setAttribute('aria-live','polite');zoomStatus.textContent='1×';
-    zoomControls.append(zoomLess,zoomRange,zoomMore,zoomStatus,zoomReset);zoomControls.querySelectorAll('button,input').forEach(control=>control.disabled=true);
+    const spineView=document.createElement('button');spineView.type='button';spineView.textContent='View spine';spineView.addEventListener('click',()=>canvas.caseViewer?.focusSpine());
+    zoomControls.append(zoomLess,zoomRange,zoomMore,zoomStatus,zoomReset,spineView);zoomControls.querySelectorAll('button,input').forEach(control=>control.disabled=true);
     zoomRange.addEventListener('input',()=>canvas.caseViewer?.setZoom(zoomRange.value));
     zoomLess.addEventListener('click',()=>canvas.caseViewer?.setZoom(Number(zoomRange.value)-.25));
     zoomMore.addEventListener('click',()=>canvas.caseViewer?.setZoom(Number(zoomRange.value)+.25));
     zoomReset.addEventListener('click',()=>canvas.caseViewer?.resetZoom());
-    function syncView({zoom,track}){zoomRange.value=String(zoom);zoomRange.disabled=false;zoomLess.disabled=zoom<=1;zoomMore.disabled=zoom>=4;zoomReset.disabled=zoom===1;zoomStatus.textContent=`${Number(zoom.toFixed(1))}×`;zoomRange.setAttribute('aria-valuetext',`${Number(zoom.toFixed(1))} times magnification`);stage.classList.toggle('is-song-focused',Boolean(track));card.querySelectorAll('.mixtape-song-zoom').forEach(control=>control.setAttribute('aria-pressed',String(control.dataset.uri===track?.uri)));}
+    function syncView({zoom,track}){zoomRange.value=String(zoom);zoomRange.disabled=false;spineView.disabled=false;spineView.setAttribute('aria-pressed',String(canvas.dataset.view==='spine'));zoomLess.disabled=zoom<=1;zoomMore.disabled=zoom>=4;zoomReset.disabled=zoom===1&&canvas.dataset.view!=='spine';zoomStatus.textContent=`${Number(zoom.toFixed(1))}×`;zoomRange.setAttribute('aria-valuetext',`${Number(zoom.toFixed(1))} times magnification`);stage.classList.toggle('is-song-focused',Boolean(track));card.querySelectorAll('.mixtape-song-zoom').forEach(control=>control.setAttribute('aria-pressed',String(control.dataset.uri===track?.uri)));}
     stage.append(canvas);card.append(stage,fallback,zoomControls,date,title,actions);grid.append(card);
     let lastTrigger,caseOpen=false;
     const panel=document.createElement('div');panel.className='mixtape-player-overlay';panel.hidden=true;panel.setAttribute('role','region');panel.setAttribute('aria-label','Spotify player');stage.append(panel);
@@ -81,7 +82,7 @@ async function showPage(){
     }
     actions.querySelector('a')?.addEventListener('click',event=>{if(!caseOpen)event.preventDefault();});
     setCaseOpen(false);
-    try{const {mountCase}=await import('./viewer.js?v=6');if(version!==generation)return;const dispose=await mountCase(canvas,button,tape,selectTrack,setCaseOpen,syncView);if(version!==generation)dispose();else disposers.push(dispose);}
+    try{const {mountCase}=await import('./viewer.js?v=spine-1');if(version!==generation)return;const dispose=await mountCase(canvas,button,tape,selectTrack,setCaseOpen,syncView);if(version!==generation)dispose();else disposers.push(dispose);}
     catch(error){console.warn('Mixtape model unavailable',error);card.classList.add('is-fallback');zoomControls.hidden=true;card.querySelectorAll('.mixtape-song-zoom').forEach(control=>control.hidden=true);canvas.hidden=true;button.disabled=false;fallback.hidden=false;fallback.textContent='3D preview unavailable. Open the case below to browse the songs.';button.addEventListener('click',()=>{setCaseOpen(!caseOpen);button.textContent=caseOpen?'Close case':'Open case';button.setAttribute('aria-expanded',String(caseOpen));if(caseOpen)card.querySelector('details')?.setAttribute('open','');});if(tape.preview)fallback.textContent='3D preview unavailable. Refresh to try again.';}
   });
   pager.hidden=entries.length<=3;
