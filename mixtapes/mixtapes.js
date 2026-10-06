@@ -1,4 +1,4 @@
-import {mountCollection} from './collection-scene.js?v=fullscreen-1';
+import {mountCollection} from './collection-scene.js?v=hover-1';
 import {attachCaseControls} from './viewer.js?v=lift-1';
 const canvas=document.querySelector('#collection-canvas');
 const hitLayer=document.querySelector('#case-targets');

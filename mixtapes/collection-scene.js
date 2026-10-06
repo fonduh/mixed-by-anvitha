@@ -23,7 +23,11 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   const standing=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(new THREE.Vector3(0,-1,0),new THREE.Vector3(0,0,-1),new THREE.Vector3(1,0,0)));
   const firstFilled=slots.findIndex(tape=>!tape.blank);
   const initialFocus=firstFilled<0?0:firstFilled;
-  let browsePosition=initialFocus,browseTarget=browsePosition,browseRAF=0,browseTime=0,browseMix=0,browseMixTarget=0;
+  // Browse by measured vertical position, shared by both columns.
+  const pitch=layout.medianCenterSpacingPx;
+  let browsePosition=layout.spines[initialFocus].centerPx[1],browseTarget=browsePosition;
+  let browseRAF=0,browseTime=0,browseMix=0,browseMixTarget=0;
+  let pointer=null,hoverIndex=null,keyboardIndex=initialFocus;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   // Every base pose comes from a traced line in the photograph. Image-plane
   // coordinates preserve perspective already present in that photograph.
@@ -37,16 +41,29 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
       .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),THREE.MathUtils.degToRad(measured.leanDeg||0))).multiply(standing);
     const anchor=new THREE.Vector3((measured.centerPx[0]-cx)*units,spineHeight,(measured.centerPx[1]-cy)*units);
     const basePosition=anchor.clone().sub(new THREE.Vector3(-.716,.052,0).multiply(modelScale).applyQuaternion(baseQuaternion));
-    return {tape,index,measured,side,uniformScale,modelScale,basePosition,baseQuaternion,position:basePosition.clone(),quaternion:baseQuaternion.clone(),matrix:new THREE.Matrix4(),color:new THREE.Color(measured.paperColor)};
+    return {tape,index,measured,side,uniformScale,modelScale,basePosition,baseQuaternion,position:basePosition.clone(),quaternion:baseQuaternion.clone(),matrix:new THREE.Matrix4(),focus:0,passed:0,color:new THREE.Color(measured.paperColor)};
   });
+  const columns={L:items.filter(item=>item.measured.column==='L'),R:items.filter(item=>item.measured.column==='R')};
+  const minRow=Math.min(...items.map(item=>item.measured.centerPx[1]));
+  const maxRow=Math.max(...items.map(item=>item.measured.centerPx[1]));
+  const nearest=(column,y)=>columns[column].reduce((best,item)=>Math.abs(item.measured.centerPx[1]-y)<Math.abs(best.measured.centerPx[1]-y)?item:best);
+  function poseFor(item,focus){
+    // Pivot at the lower edge, keeping the measured spacing on the box floor.
+    // Negative world-X rotation sends the upper edge toward screen top.
+    const passed=ease(clamp((browsePosition-item.measured.centerPx[1]-pitch*.4)/(pitch*3),0,1))*browseMix*(1-focus);
+    const quaternion=item.baseQuaternion.clone().slerp(standing,focus);
+    quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-.32*passed));
+    const foot=new THREE.Vector3(.716,0,0).multiply(item.modelScale);
+    const position=item.basePosition.clone()
+      .add(foot.clone().applyQuaternion(item.baseQuaternion))
+      .sub(foot.applyQuaternion(quaternion));
+    position.y+=.24*focus;
+    return {position,quaternion,passed};
+  }
   function browsePose(item){
-    const distance=item.index-browsePosition,focus=Math.exp(-Math.pow(distance/.64,2))*browseMix;
-    const nearby=Math.exp(-Math.pow(distance/2.3,2))*browseMix;
-    item.position.copy(item.basePosition);item.position.y+=.25*focus;
-    item.quaternion.copy(item.baseQuaternion).slerp(standing,focus);
-    item.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),item.side*.012*nearby*(1-focus)));
+    const pose=poseFor(item,item.focus);
+    item.position.copy(pose.position);item.quaternion.copy(pose.quaternion);item.passed=pose.passed;
     item.matrix.compose(item.position,item.quaternion,new THREE.Vector3().setScalar(item.uniformScale));
-    item.focus=focus;
   }
   items.forEach(browsePose);
   // Each stored blank is an instance of the original GLB meshes. Picking one
@@ -99,86 +116,138 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     // Follow the browsed row so the cropped rows remain reachable by scrolling.
     const distance=Math.min(depth/(2*Math.tan(fov)),width/(2*Math.tan(fov)*camera.aspect));
     const viewDepth=2*distance*Math.tan(fov);
-    const row=clamp(browsePosition,0,items.length-1),lo=Math.floor(row),hi=Math.ceil(row);
-    const rowY=THREE.MathUtils.lerp(items[lo].measured.centerPx[1],items[hi].measured.centerPx[1],row-lo);
+    const rowY=browsePosition;
     const centerZ=clamp((rowY-cy)*units,-depth/2+viewDepth/2,depth/2-viewDepth/2);
     // A plan-view camera reproduces the measured 2D geometry exactly. Camera
     // perspective in the source is retained in the traced centers and spans.
     camera.up.set(0,0,-1);camera.position.set(0,spineHeight+distance,centerZ);camera.lookAt(0,spineHeight,centerZ);camera.updateMatrixWorld();
     homeCamera.copy(camera.position);homeQuaternion.copy(camera.quaternion);
   }
+  function screen(point){
+    const r=canvas.getBoundingClientRect();point.project(camera);
+    return {x:(point.x+1)*r.width/2,y:(1-point.y)*r.height/2};
+  }
+  function pointerCase(){
+    // Include scroll lean in hit positions, but exclude the hover lift itself.
+    // This keeps selection aligned with the visible row without hover feedback.
+    if(!pointer){hoverIndex=null;return;}
+    const pointerTargets=items.map(item=>{
+      const pose=poseFor(item,0);
+      const edge=z=>screen(new THREE.Vector3(-.716,.052,z).multiply(item.modelScale).applyQuaternion(pose.quaternion).add(pose.position));
+      return {index:item.index,left:edge(-.625),right:edge(.625)};
+    });
+    let closest=null,distance=Infinity;
+    for(const point of pointerTargets){
+      const lo=Math.min(point.left.x,point.right.x),hi=Math.max(point.left.x,point.right.x);
+      if(pointer.x<lo-10||pointer.x>hi+10)continue;
+      const t=clamp((pointer.x-point.left.x)/(point.right.x-point.left.x),0,1);
+      const y=THREE.MathUtils.lerp(point.left.y,point.right.y,t);
+      const d=Math.abs(pointer.y-y);
+      if(d<distance){distance=d;closest=point.index;}
+    }
+    hoverIndex=closest;
+  }
+  function focusedIndex(){return hoverIndex??keyboardIndex;}
   function targets(){
     const r=canvas.getBoundingClientRect();
-    const screen=point=>{point.project(camera);return {x:(point.x+1)*r.width/2,y:(1-point.y)*r.height/2};};
     const points=items.map(item=>{
       const center=screen(new THREE.Vector3(-.716,.052*thickness,0).applyMatrix4(item.matrix));
       const left=screen(new THREE.Vector3(-.716,.052*thickness,-.625).applyMatrix4(item.matrix));
       const right=screen(new THREE.Vector3(-.716,.052*thickness,.625).applyMatrix4(item.matrix));
-      return {index:item.index,x:center.x,y:center.y,width:Math.hypot(right.x-left.x,right.y-left.y),height:Math.max(14,r.height*spacing/(2*(camera.position.y-spineHeight)*Math.tan(THREE.MathUtils.degToRad(camera.fov/2)))*.7),angle:Math.atan2(right.y-left.y,right.x-left.x)*180/Math.PI,focused:Math.round(browsePosition)===item.index};
+      return {index:item.index,x:center.x,y:center.y,width:Math.hypot(right.x-left.x,right.y-left.y),height:Math.max(14,r.height*spacing/(2*(camera.position.y-spineHeight)*Math.tan(THREE.MathUtils.degToRad(camera.fov/2)))*.7),angle:Math.atan2(right.y-left.y,right.x-left.x)*180/Math.PI,focused:focusedIndex()===item.index};
     });onLayout(points);
   }
-  function updateBrowse(){
+  function updateBrowse(blend=1){
+    placeCamera();pointerCase();
+    const scrollFocus=new Set(['L','R'].map(column=>nearest(column,browsePosition).index));
+    let moving=false;
     items.forEach(item=>{
+      const target=hoverIndex!==null?Number(item.index===hoverIndex):(scrollFocus.has(item.index)?browseMix:0);
+      item.focus+=(target-item.focus)*blend;
+      if(Math.abs(target-item.focus)<.002)item.focus=target;else moving=true;
       browsePose(item);
       if(item.model){item.model.pack.position.copy(item.position);item.model.pack.quaternion.copy(item.quaternion);}
       else setInstance(item,true);
     });
     canvas.dataset.browse=browsePosition.toFixed(3);
-    canvas.dataset.focusedCase=String(Math.round(browsePosition));
-    placeCamera();targets();draw();onBrowse(Math.round(browsePosition));
+    canvas.dataset.focusedCase=String(focusedIndex());
+    canvas.dataset.hoveredCase=hoverIndex===null?'':String(hoverIndex);
+    targets();draw();onBrowse(focusedIndex());return moving;
   }
   function browseFrame(time){
     browseRAF=0;if(state!=='box')return;
     const dt=Math.min(50,time-browseTime||16.7);browseTime=time;
-    const blend=1-Math.exp(-dt/95);
+    const blend=1-Math.exp(-dt/110);
     browsePosition+=(browseTarget-browsePosition)*blend;
     browseMix+=(browseMixTarget-browseMix)*blend;
     if(Math.abs(browseMixTarget-browseMix)<.002)browseMix=browseMixTarget;
     if(Math.abs(browseTarget-browsePosition)<.002)browsePosition=browseTarget;
-    updateBrowse();
-    if(browsePosition!==browseTarget||browseMix!==browseMixTarget)browseRAF=requestAnimationFrame(browseFrame);
+    const moving=updateBrowse(blend);
+    if(moving||browsePosition!==browseTarget||browseMix!==browseMixTarget)browseRAF=requestAnimationFrame(browseFrame);
+  }
+  function animateBrowse(){
+    if(state!=='box')return;
+    if(reduced.matches){browsePosition=browseTarget;browseMix=browseMixTarget;updateBrowse();}
+    else if(!browseRAF){browseTime=performance.now();browseRAF=requestAnimationFrame(browseFrame);}
   }
   function browseTo(index){
     if(state!=='box')return false;
-    const next=clamp(index,0,items.length-1);if(next===browseTarget)return false;
-    browseTarget=next;browseMixTarget=1;
-    if(reduced.matches){browsePosition=browseTarget;browseMix=browseMixTarget;updateBrowse();}
-    else if(!browseRAF){browseTime=performance.now();browseRAF=requestAnimationFrame(browseFrame);}
-    return true;
+    keyboardIndex=clamp(Math.round(index),0,items.length-1);
+    browseTarget=items[keyboardIndex].measured.centerPx[1];browseMixTarget=1;
+    animateBrowse();return true;
   }
-  function browseBy(delta){return browseTo(browseTarget+delta);}
+  function browseBy(delta){
+    if(state!=='box')return false;
+    const next=clamp(browseTarget+delta*pitch,minRow,maxRow);
+    if(next===browseTarget)return false;
+    const column=items[focusedIndex()].measured.column;
+    browseTarget=next;keyboardIndex=nearest(column,next).index;browseMixTarget=1;
+    animateBrowse();return true;
+  }
   const surface=canvas.parentElement;
-  let wheelRest=0,touch=null,suppressClick=false;
+  let touch=null,suppressClick=false;
   surface.addEventListener('wheel',event=>{
     if(state!=='box'||event.ctrlKey||!event.deltaY)return;
     const units=event.deltaMode===1?16:event.deltaMode===2?canvas.clientHeight:1;
-    const next=browseTarget+clamp(event.deltaY*units,-280,280)/145;
-    if(!browseTo(next))return;
-    event.preventDefault();clearTimeout(wheelRest);
-    wheelRest=setTimeout(()=>browseTo(Math.round(browseTarget)),160);
+    if(browseBy(clamp(event.deltaY*units,-280,280)/145))event.preventDefault();
   },{passive:false});
+  surface.addEventListener('pointerleave',()=>{if(state==='box'){pointer=null;animateBrowse();}});
   surface.addEventListener('pointerdown',event=>{
     suppressClick=false;
     if(state!=='box'||event.pointerType!=='touch')return;
-    touch={id:event.pointerId,y:event.clientY,last:event.clientY,moved:false};suppressClick=false;
+    pointer=null;hoverIndex=null;
+    touch={id:event.pointerId,y:event.clientY,last:event.clientY,moved:false};
   });
   surface.addEventListener('pointermove',event=>{
-    if(!touch||touch.id!==event.pointerId||state!=='box')return;
+    if(state!=='box')return;
+    if(event.pointerType==='mouse'||event.pointerType==='pen'){
+      const r=canvas.getBoundingClientRect();pointer={x:event.clientX-r.left,y:event.clientY-r.top};animateBrowse();return;
+    }
+    if(!touch||touch.id!==event.pointerId)return;
     if(Math.abs(event.clientY-touch.y)>7)touch.moved=true;
     if(touch.moved){event.preventDefault();browseBy((touch.last-event.clientY)/55);}
     touch.last=event.clientY;
   },{passive:false});
-  const endTouch=()=>{if(!touch)return;suppressClick=touch.moved;if(touch.moved)browseTo(Math.round(browseTarget));touch=null;};
+  const endTouch=()=>{if(!touch)return;suppressClick=touch.moved;touch=null;};
   surface.addEventListener('pointerup',endTouch);surface.addEventListener('pointercancel',endTouch);
-  surface.addEventListener('click',event=>{if(suppressClick){suppressClick=false;event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
+  surface.addEventListener('click',event=>{
+    if(state!=='box')return;
+    if(suppressClick){suppressClick=false;event.preventDefault();event.stopImmediatePropagation();return;}
+    // A pointer click picks the lifted case even when its projected spine has
+    // moved above the resting hit area. Keyboard activation keeps its DOM target.
+    if(event.detail>0&&hoverIndex!==null){event.preventDefault();event.stopImmediatePropagation();pick(hoverIndex);}
+  },{capture:true});
   surface.addEventListener('keydown',event=>{
     if(state!=='box')return;
-    const current=items[Math.round(browseTarget)];
-    const acrossColumn=event.key==='ArrowLeft'?'L':'R';
-    const across=items.find(item=>item.measured.column===acrossColumn&&item.measured.order===Math.min(current.measured.order,layout.columns[acrossColumn]));
-    const steps={ArrowDown:1,ArrowUp:-1,ArrowLeft:across?across.index-current.index:0,ArrowRight:across?across.index-current.index:0};
-    let next;if(event.key in steps)next=Math.round(browseTarget)+steps[event.key];else if(event.key==='Home')next=0;else if(event.key==='End')next=items.length-1;else return;
-    event.preventDefault();next=clamp(next,0,items.length-1);browseTo(next);
+    const targetIndex=Array.from(surface.querySelectorAll('.case-hit')).indexOf(event.target.closest('.case-hit'));
+    const current=items[targetIndex<0?focusedIndex():targetIndex],column=columns[current.measured.column];
+    let next;
+    if(event.key==='ArrowLeft'||event.key==='ArrowRight')next=nearest(event.key==='ArrowLeft'?'L':'R',current.measured.centerPx[1]).index;
+    else if(event.key==='ArrowDown'||event.key==='ArrowUp')next=column[clamp(column.indexOf(current)+(event.key==='ArrowDown'?1:-1),0,column.length-1)].index;
+    else if(event.key==='Home')next=column[0].index;
+    else if(event.key==='End')next=column.at(-1).index;
+    else return;
+    event.preventDefault();pointer=null;hoverIndex=null;browseTo(next);
     surface.querySelectorAll('.case-hit')[next]?.focus({preventScroll:true});
   });
   function resize(){
@@ -186,7 +255,7 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();
     const previousPosition=camera.position.clone(),previousQuaternion=camera.quaternion.clone(),previousUp=camera.up.clone();
     placeCamera();
-    if(state==='box'){targets();draw();}
+    if(state==='box'){pointerCase();targets();draw();}
     else {
       camera.position.copy(previousPosition);camera.quaternion.copy(previousQuaternion);camera.up.copy(previousUp);camera.updateMatrixWorld();
       if(motion){
@@ -225,7 +294,7 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   function pick(index){
     if(state!=='box')return;
     const item=items[index];if(!item)return;
-    cancelAnimationFrame(browseRAF);browseRAF=0;clearTimeout(wheelRest);browseTarget=browsePosition;browseMixTarget=browseMix;
+    cancelAnimationFrame(browseRAF);browseRAF=0;browseTarget=browsePosition;browseMixTarget=browseMix;pointer=null;hoverIndex=null;keyboardIndex=index;
     active=item;active.model=promote(item);scene.attach(active.model.pack);
     onPick(item.tape,index);setState('lifting');
     camera.up.set(0,1,0);const end=detailPose();
@@ -267,7 +336,7 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
       active.model.hinge.rotation.z=0;
       if(active.tape.blank){scene.remove(active.model.pack);setInstance(active,true);active.model.dispose();delete active.model;}
       else storage.attach(active.model.pack);
-      active=null;backdrop(1);setState('box');placeCamera();targets();onReturn(true);
+      active=null;backdrop(1);setState('box');placeCamera();targets();onReturn(true);animateBrowse();
     }else{
       backdrop(0);setState('held');
       detailDispose=onReady(active.model,{renderer,scene,camera,draw});
