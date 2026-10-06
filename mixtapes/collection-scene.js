@@ -95,10 +95,16 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   }
   function placeCamera(){
     const fov=THREE.MathUtils.degToRad(camera.fov/2);
-    const distance=Math.max(depth/(2*Math.tan(fov)),width/(2*Math.tan(fov)*camera.aspect))*1.075;
+    // Cover the viewport with the box instead of fitting its entire height.
+    // Follow the browsed row so the cropped rows remain reachable by scrolling.
+    const distance=Math.min(depth/(2*Math.tan(fov)),width/(2*Math.tan(fov)*camera.aspect));
+    const viewDepth=2*distance*Math.tan(fov);
+    const row=clamp(browsePosition,0,items.length-1),lo=Math.floor(row),hi=Math.ceil(row);
+    const rowY=THREE.MathUtils.lerp(items[lo].measured.centerPx[1],items[hi].measured.centerPx[1],row-lo);
+    const centerZ=clamp((rowY-cy)*units,-depth/2+viewDepth/2,depth/2-viewDepth/2);
     // A plan-view camera reproduces the measured 2D geometry exactly. Camera
     // perspective in the source is retained in the traced centers and spans.
-    camera.up.set(0,0,-1);camera.position.set(0,spineHeight+distance,0);camera.lookAt(0,spineHeight,0);camera.updateMatrixWorld();
+    camera.up.set(0,0,-1);camera.position.set(0,spineHeight+distance,centerZ);camera.lookAt(0,spineHeight,centerZ);camera.updateMatrixWorld();
     homeCamera.copy(camera.position);homeQuaternion.copy(camera.quaternion);
   }
   function targets(){
@@ -108,7 +114,7 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
       const center=screen(new THREE.Vector3(-.716,.052*thickness,0).applyMatrix4(item.matrix));
       const left=screen(new THREE.Vector3(-.716,.052*thickness,-.625).applyMatrix4(item.matrix));
       const right=screen(new THREE.Vector3(-.716,.052*thickness,.625).applyMatrix4(item.matrix));
-      return {index:item.index,x:center.x,y:center.y,width:Math.hypot(right.x-left.x,right.y-left.y),height:Math.max(14,r.height*spacing/(depth+.6)*.7),angle:Math.atan2(right.y-left.y,right.x-left.x)*180/Math.PI,focused:Math.round(browsePosition)===item.index};
+      return {index:item.index,x:center.x,y:center.y,width:Math.hypot(right.x-left.x,right.y-left.y),height:Math.max(14,r.height*spacing/(2*(camera.position.y-spineHeight)*Math.tan(THREE.MathUtils.degToRad(camera.fov/2)))*.7),angle:Math.atan2(right.y-left.y,right.x-left.x)*180/Math.PI,focused:Math.round(browsePosition)===item.index};
     });onLayout(points);
   }
   function updateBrowse(){
@@ -119,7 +125,7 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     });
     canvas.dataset.browse=browsePosition.toFixed(3);
     canvas.dataset.focusedCase=String(Math.round(browsePosition));
-    targets();draw();onBrowse(Math.round(browsePosition));
+    placeCamera();targets();draw();onBrowse(Math.round(browsePosition));
   }
   function browseFrame(time){
     browseRAF=0;if(state!=='box')return;

@@ -1,4 +1,4 @@
-import {mountCollection} from './collection-scene.js?v=measured-1';
+import {mountCollection} from './collection-scene.js?v=fullscreen-1';
 import {attachCaseControls} from './viewer.js?v=lift-1';
 const canvas=document.querySelector('#collection-canvas');
 const hitLayer=document.querySelector('#case-targets');
@@ -141,7 +141,6 @@ async function load(){
       button.disabled=true;button.setAttribute('aria-label',tape.blank?`Pick up empty case ${i+1}`:`Pick up ${tape.title}, ${tape.label}`);
       button.addEventListener('click',()=>viewer?.pick(i));hitLayer.append(button);
     });
-    document.querySelector('#collection-count').textContent=`${String(entries.length).padStart(2,'0')} ${entries.length===1?'MIX':'MIXES'} / ${count-entries.length} EMPTY CASES`;
     viewer=await mountCollection(canvas,slots,{layout,onPick,onReady,onReturn,onProgress:()=>{},onLayout:layoutTargets});
     hitLayer.querySelectorAll('button').forEach(button=>button.disabled=false);note.textContent='Scroll to browse. Click a spine to pick it up.';
   }catch(error){
