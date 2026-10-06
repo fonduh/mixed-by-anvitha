@@ -1,4 +1,4 @@
-import {mountCollection} from './collection-scene.js?v=lift-1';
+import {mountCollection} from './collection-scene.js?v=browse-1';
 import {attachCaseControls} from './viewer.js?v=lift-1';
 const canvas=document.querySelector('#collection-canvas');
 const hitLayer=document.querySelector('#case-targets');
@@ -87,7 +87,7 @@ function onReturn(done){
   returning=true;syncOpen(false);controls.inert=true;controls.classList.add('is-moving');
   if(!done){note.textContent='Putting it back…';revealCase();return;}
   selected=null;returning=false;controls.hidden=true;back.hidden=true;hitLayer.hidden=false;
-  document.body.classList.remove('case-is-out');heading.textContent='The mixtape box';note.textContent='Click a spine to pick up the case.';
+  document.body.classList.remove('case-is-out');heading.textContent='The mixtape box';note.textContent='Scroll to browse. Click a spine to pick it up.';
   hitLayer.children[selectedIndex]?.focus({preventScroll:true});
 }
 back.addEventListener('click',()=>viewer?.putBack());
@@ -105,6 +105,10 @@ function layoutTargets(points){
     const button=hitLayer.children[point.index];if(!button)continue;
     button.style.left=`${point.x-point.width/2}px`;button.style.top=`${point.y-point.height/2}px`;
     button.style.width=`${point.width}px`;button.style.height=`${point.height}px`;
+    button.style.transform=`rotate(${point.angle}deg)`;
+    button.style.zIndex=point.focused?'2':'1';
+    button.tabIndex=point.focused?0:-1;
+    button.setAttribute('aria-current',String(point.focused));
   }
 }
 async function load(){
@@ -122,7 +126,7 @@ async function load(){
     });
     document.querySelector('#collection-count').textContent=`${String(entries.length).padStart(2,'0')} ${entries.length===1?'MIX':'MIXES'} / ${count-entries.length} EMPTY CASES`;
     viewer=await mountCollection(canvas,slots,{onPick,onReady,onReturn,onProgress:()=>{},onLayout:layoutTargets});
-    hitLayer.querySelectorAll('button').forEach(button=>button.disabled=false);note.textContent='Click a spine to pick up the case.';
+    hitLayer.querySelectorAll('button').forEach(button=>button.disabled=false);note.textContent='Scroll to browse. Click a spine to pick it up.';
   }catch(error){
     console.error(error);note.textContent='The 3D box could not load. Refresh to try again.';
     document.querySelector('#load-fallback').hidden=false;

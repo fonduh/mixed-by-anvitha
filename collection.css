@@ -30,3 +30,7 @@
  #case-controls .mixtape-zoom-controls{gap:7px}#case-controls{margin-top:-55px}.mixtape-actions{gap:10px}
 }
 @media(prefers-reduced-motion:reduce){#case-controls{transition:none}}
+
+/* Scrubbing is local to the box; held cases retain drag and scroll zoom. */
+body:not(.case-is-out) .collection-stage,body:not(.case-is-out) #collection-canvas,body:not(.case-is-out) .case-hit{touch-action:pan-x pinch-zoom}
+.case-hit{transform-origin:center}

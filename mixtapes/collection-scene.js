@@ -3,7 +3,7 @@ import {createCase} from './case-model.js?v=lift-1';
 
 const ease=t=>t*t*t*(t*(t*6-15)+10);
 const clamp=THREE.MathUtils.clamp;
-export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onProgress,onLayout}){
+export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onProgress,onLayout,onBrowse=()=>{}}){
   const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.85;
   const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(33,1,.01,80);
@@ -16,14 +16,44 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   const pmrem=new THREE.PMREMGenerator(renderer),env=pmrem.fromScene(room,.08);scene.environment=env.texture;pmrem.dispose();room.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});
   const storage=new THREE.Group();scene.add(storage);
   const blank=await createCase(renderer,{title:'',label:'',tracks:[],blank:true});
-  const rows=slots.length/2,spacing=.143,depth=rows*spacing+.17;
+  const rows=slots.length/2,spacing=.209;
   const standing=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(new THREE.Vector3(0,-1,0),new THREE.Vector3(0,0,-1),new THREE.Vector3(1,0,0)));
   const palette=['#e4ddc8','#454a46','#b89b94','#d9d5c6','#78858a','#c3b28d','#454a46','#8ea9ac'];
-  const items=slots.map((tape,index)=>{
-    const position=new THREE.Vector3(index<rows?-.67:.67,.746+((index*7)%4)*.004,(index%rows-(rows-1)/2)*spacing);
-    const quaternion=standing.clone().premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),((index*7)%5-2)*.002));
-    return {tape,index,position,quaternion,matrix:new THREE.Matrix4().compose(position,quaternion,new THREE.Vector3(1,1,1)),color:new THREE.Color(palette[(index*13+Math.floor(index/3))%palette.length])};
+  // Small irregular stacks, with different breaks in each column. The room
+  // between cases accommodates their real GLB thickness when they lean.
+  const noise=i=>{const x=Math.sin(i*127.1+73.7)*43758.5453;return x-Math.floor(x);};
+  const offsets=Array.from({length:2},(_,column)=>{
+    let z=column?.13:0;
+    return Array.from({length:rows},(_,row)=>{
+      if(row)z+=spacing+noise(row+column*rows)*.018;
+      if((column===0&&[4,11,19].includes(row))||(column===1&&[7,16].includes(row)))z+=column?.18:.12;
+      return z;
+    });
   });
+  const last=Math.max(...offsets.flat()),depth=last+.42;
+  const firstFilled=slots.findIndex(tape=>!tape.blank);
+  let browsePosition=firstFilled<0?0:firstFilled,browseTarget=browsePosition,browseRAF=0,browseTime=0;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  const items=slots.map((tape,index)=>{
+    const column=index<rows?0:1,row=index%rows,side=column?1:-1;
+    const basePosition=new THREE.Vector3(side*.681+(noise(index+10)-.5)*.034,.769+noise(index+20)*.036,offsets[column][row]-last/2);
+    const cluster=Math.floor((row+(column?2:0))/5),sign=cluster%2?-1:1;
+    const restYaw=sign*(.036+noise(index+30)*.019),restLean=.034+noise(index+40)*.017,restRoll=side*(.011+noise(index+50)*.009);
+    return {tape,index,basePosition,restYaw,restLean,restRoll,side,position:basePosition.clone(),quaternion:standing.clone(),matrix:new THREE.Matrix4(),color:new THREE.Color(palette[(index*13+Math.floor(index/3))%palette.length])};
+  });
+  function browsePose(item){
+    const distance=item.index-browsePosition,focus=Math.exp(-Math.pow(distance/.64,2));
+    const nearby=Math.exp(-Math.pow(distance/2.3,2)),passed=-Math.tanh(distance*1.8);
+    item.position.copy(item.basePosition);
+    item.position.y+=.29*focus+.035*nearby*(1-focus);
+    item.position.x+=item.side*.009*nearby*(1-focus);
+    const yaw=(item.restYaw+passed*.018*nearby)*(1-focus);
+    const lean=item.restLean*(1-focus),roll=(item.restRoll+item.side*.014*nearby)*(1-focus);
+    item.quaternion.setFromEuler(new THREE.Euler(lean,yaw,roll,'YXZ')).multiply(standing);
+    item.matrix.compose(item.position,item.quaternion,new THREE.Vector3(1,1,1));
+    item.focus=focus;
+  }
+  items.forEach(browsePose);
   // Each stored blank is an instance of the original GLB meshes. Picking one
   // promotes exactly those meshes, at exactly the same matrix, for articulation.
   const empty=items.filter(item=>item.tape.blank),batches=[];
@@ -75,13 +105,73 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     homeCamera.copy(camera.position);homeQuaternion.copy(camera.quaternion);
   }
   function targets(){
+    const r=canvas.getBoundingClientRect();
+    const screen=point=>{point.project(camera);return {x:(point.x+1)*r.width/2,y:(1-point.y)*r.height/2};};
     const points=items.map(item=>{
-      const center=new THREE.Vector3(-.716,.052,0).applyMatrix4(item.matrix).project(camera);
-      const left=new THREE.Vector3(-.716,.052,-.625).applyMatrix4(item.matrix).project(camera);
-      const right=new THREE.Vector3(-.716,.052,.625).applyMatrix4(item.matrix).project(camera);
-      const r=canvas.getBoundingClientRect();return {index:item.index,x:(center.x+1)*r.width/2,y:(1-center.y)*r.height/2,width:Math.abs(right.x-left.x)*r.width/2,height:Math.max(16,r.height*spacing/(depth+.6)*.85)};
+      const center=screen(new THREE.Vector3(-.716,.052,0).applyMatrix4(item.matrix));
+      const left=screen(new THREE.Vector3(-.716,.052,-.625).applyMatrix4(item.matrix));
+      const right=screen(new THREE.Vector3(-.716,.052,.625).applyMatrix4(item.matrix));
+      return {index:item.index,x:center.x,y:center.y,width:Math.hypot(right.x-left.x,right.y-left.y),height:Math.max(14,r.height*spacing/(depth+.6)*.7),angle:Math.atan2(right.y-left.y,right.x-left.x)*180/Math.PI,focused:Math.round(browsePosition)===item.index};
     });onLayout(points);
   }
+  function updateBrowse(){
+    items.forEach(item=>{
+      browsePose(item);
+      if(item.model){item.model.pack.position.copy(item.position);item.model.pack.quaternion.copy(item.quaternion);}
+      else setInstance(item,true);
+    });
+    canvas.dataset.browse=browsePosition.toFixed(3);
+    canvas.dataset.focusedCase=String(Math.round(browsePosition));
+    targets();draw();onBrowse(Math.round(browsePosition));
+  }
+  function browseFrame(time){
+    browseRAF=0;if(state!=='box')return;
+    const dt=Math.min(50,time-browseTime||16.7);browseTime=time;
+    browsePosition+=(browseTarget-browsePosition)*(1-Math.exp(-dt/95));
+    if(Math.abs(browseTarget-browsePosition)<.002)browsePosition=browseTarget;
+    updateBrowse();
+    if(browsePosition!==browseTarget)browseRAF=requestAnimationFrame(browseFrame);
+  }
+  function browseTo(index){
+    if(state!=='box')return false;
+    const next=clamp(index,0,items.length-1);if(next===browseTarget)return false;
+    browseTarget=next;
+    if(reduced.matches){browsePosition=browseTarget;updateBrowse();}
+    else if(!browseRAF){browseTime=performance.now();browseRAF=requestAnimationFrame(browseFrame);}
+    return true;
+  }
+  function browseBy(delta){return browseTo(browseTarget+delta);}
+  const surface=canvas.parentElement;
+  let wheelRest=0,touch=null,suppressClick=false;
+  surface.addEventListener('wheel',event=>{
+    if(state!=='box'||event.ctrlKey||!event.deltaY)return;
+    const units=event.deltaMode===1?16:event.deltaMode===2?canvas.clientHeight:1;
+    const next=browseTarget+clamp(event.deltaY*units,-280,280)/145;
+    if(!browseTo(next))return;
+    event.preventDefault();clearTimeout(wheelRest);
+    wheelRest=setTimeout(()=>browseTo(Math.round(browseTarget)),160);
+  },{passive:false});
+  surface.addEventListener('pointerdown',event=>{
+    suppressClick=false;
+    if(state!=='box'||event.pointerType!=='touch')return;
+    touch={id:event.pointerId,y:event.clientY,last:event.clientY,moved:false};suppressClick=false;
+  });
+  surface.addEventListener('pointermove',event=>{
+    if(!touch||touch.id!==event.pointerId||state!=='box')return;
+    if(Math.abs(event.clientY-touch.y)>7)touch.moved=true;
+    if(touch.moved){event.preventDefault();browseBy((touch.last-event.clientY)/55);}
+    touch.last=event.clientY;
+  },{passive:false});
+  const endTouch=()=>{if(!touch)return;suppressClick=touch.moved;if(touch.moved)browseTo(Math.round(browseTarget));touch=null;};
+  surface.addEventListener('pointerup',endTouch);surface.addEventListener('pointercancel',endTouch);
+  surface.addEventListener('click',event=>{if(suppressClick){suppressClick=false;event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
+  surface.addEventListener('keydown',event=>{
+    if(state!=='box')return;
+    const steps={ArrowDown:1,ArrowUp:-1,ArrowLeft:-rows,ArrowRight:rows};
+    let next;if(event.key in steps)next=Math.round(browseTarget)+steps[event.key];else if(event.key==='Home')next=0;else if(event.key==='End')next=items.length-1;else return;
+    event.preventDefault();next=clamp(next,0,items.length-1);browseTo(next);
+    surface.querySelectorAll('.case-hit')[next]?.focus({preventScroll:true});
+  });
   function resize(){
     const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;
     renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();
@@ -126,6 +216,7 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   function pick(index){
     if(state!=='box')return;
     const item=items[index];if(!item)return;
+    cancelAnimationFrame(browseRAF);browseRAF=0;clearTimeout(wheelRest);browseTarget=browsePosition;
     active=item;active.model=promote(item);scene.attach(active.model.pack);
     onPick(item.tape,index);setState('lifting');
     const end=detailPose();
@@ -174,11 +265,10 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     }
     draw();
   }
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  reduced.addEventListener('change',()=>{if(motion)finishMotion();});
+  reduced.addEventListener('change',()=>{if(motion)finishMotion();if(reduced.matches&&state==='box'){cancelAnimationFrame(browseRAF);browseRAF=0;browsePosition=browseTarget;updateBrowse();}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&motion)finishMotion();});
-  canvas.dataset.ready='true';canvas.dataset.state='box';draw();targets();
-  const api={pick,putBack,renderer,scene,camera,items,get active(){return active;},get state(){return state;}};
+  canvas.dataset.ready='true';canvas.dataset.state='box';updateBrowse();
+  const api={pick,putBack,browseTo,browseBy,get browsePosition(){return browsePosition;},get browseTarget(){return browseTarget;},renderer,scene,camera,items,get active(){return active;},get state(){return state;}};
   canvas.collectionViewer=api;
   return api;
 }
