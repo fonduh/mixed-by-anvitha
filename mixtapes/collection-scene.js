@@ -1,26 +1,31 @@
 import * as THREE from 'three';
-import {createCase} from './case-model.js?v=lift-1';
+import {createCase} from './case-model.js?v=clear-lid-1';
+import {mergeGeometries} from '../album/vendor/BufferGeometryUtils.js';
+import {caseFrame,coverDirection} from './case-framing.js?v=handwritten-1';
 
 const ease=t=>t*t*t*(t*(t*6-15)+10);
 const clamp=THREE.MathUtils.clamp;
 export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onProgress,onLayout,layout,onBrowse=()=>{}}){
   const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.85;
-  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(33,1,.01,80);
-  scene.add(new THREE.HemisphereLight(0xfffbee,0x637567,1));
-  const key=new THREE.DirectionalLight(0xffffff,1.7);key.position.set(-2,5,3);scene.add(key);
-  const room=new THREE.Scene();room.add(new THREE.Mesh(new THREE.BoxGeometry(12,12,12),new THREE.MeshBasicMaterial({color:0x87958a,side:THREE.BackSide})));
-  for(const [x,y,z,w,h,intensity] of [[-3,4,1,2,6,5],[4,3,-2,1,5,3],[0,5,-3,5,2,4]]){
-    const panel=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color().setScalar(intensity),side:THREE.DoubleSide}));panel.position.set(x,y,z);panel.lookAt(0,0,0);room.add(panel);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;
+  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(33,1,.01,80);scene.background=new THREE.Color(0xf6f5e9);
+  scene.add(new THREE.HemisphereLight(0xffffff,0x73786c,.65));
+  const key=new THREE.DirectionalLight(0xfff9e9,1.1);key.position.set(-3,10,5);scene.add(key);
+  const fill=new THREE.DirectionalLight(0xe0ebff,.2);fill.position.set(5,6,-2);scene.add(fill);
+  // Reference studio cards converted from its front-facing camera to Y-up.
+  const room=new THREE.Scene();room.background=new THREE.Color(.008,.008,.008);
+  for(const [position,size,intensity] of [[[-1.2,.25,1.1],[.32,3.5],7],[[1.3,.15,.7],[.22,3],5],[[0,1.4,.6],[3,.4],6],[[.3,-1.6,.3],[2.5,.2],3],[[-.3,.4,2.5],[2,2],.025]]){
+    const panel=new THREE.Mesh(new THREE.PlaneGeometry(...size),new THREE.MeshBasicMaterial({color:new THREE.Color().setScalar(intensity),side:THREE.DoubleSide}));panel.position.set(position[0],position[2],-position[1]);panel.lookAt(0,0,0);room.add(panel);
   }
-  const pmrem=new THREE.PMREMGenerator(renderer),env=pmrem.fromScene(room,.08);scene.environment=env.texture;pmrem.dispose();room.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});
+  const pmrem=new THREE.PMREMGenerator(renderer),env=pmrem.fromScene(room,.04,.1,10);scene.environment=env.texture;pmrem.dispose();room.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});
   const storage=new THREE.Group();scene.add(storage);
   const blank=await createCase(renderer,{title:'',label:'',tracks:[],blank:true});
-  const units=layout.worldUnitsPerPixel,thickness=layout.caseThicknessScale;
+  const units=layout.worldUnitsPerPixel,thickness=1;
+  const footprint=blank.footprint;
   const [left,top,right,bottom]=layout.boundsPx,cx=(left+right)/2,cy=(top+bottom)/2;
   const width=(right-left)*units,depth=(bottom-top)*units,spacing=layout.medianCenterSpacingPx*units;
   const spineHeight=1.5;
-  const standing=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(new THREE.Vector3(0,-1,0),new THREE.Vector3(0,0,-1),new THREE.Vector3(1,0,0)));
+  const standing=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),Math.PI/2);
   const firstFilled=slots.findIndex(tape=>!tape.blank);
   const initialFocus=firstFilled<0?0:firstFilled;
   // Browse by measured vertical position, shared by both columns.
@@ -31,16 +36,15 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   // Every base pose comes from a traced line in the photograph. Image-plane
   // coordinates preserve perspective already present in that photograph.
-  // The common thickness calibration applies to BOTH stored and lifted GLBs.
-  blank.pack.scale.y=thickness;
+  // Uniform scale preserves the new model's physical proportions, including its edges.
   const items=slots.map((tape,index)=>{
     const measured=layout.spines[index],side=measured.column==='L'?-1:1;
-    const uniformScale=measured.widthPx*units/1.25;
+    const uniformScale=measured.widthPx*units/footprint.width;
     const modelScale=new THREE.Vector3(uniformScale,uniformScale*thickness,uniformScale);
     const baseQuaternion=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),-THREE.MathUtils.degToRad(measured.angleDeg))
       .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),THREE.MathUtils.degToRad(measured.leanDeg||0))).multiply(standing);
     const anchor=new THREE.Vector3((measured.centerPx[0]-cx)*units,spineHeight,(measured.centerPx[1]-cy)*units);
-    const basePosition=anchor.clone().sub(new THREE.Vector3(-.716,.052,0).multiply(modelScale).applyQuaternion(baseQuaternion));
+    const basePosition=anchor.clone().sub(footprint.spineCenter.clone().multiply(modelScale).applyQuaternion(baseQuaternion));
     return {tape,index,measured,side,uniformScale,modelScale,basePosition,baseQuaternion,position:basePosition.clone(),quaternion:baseQuaternion.clone(),matrix:new THREE.Matrix4(),focus:0,passed:0,color:new THREE.Color(measured.paperColor)};
   });
   const columns={L:items.filter(item=>item.measured.column==='L'),R:items.filter(item=>item.measured.column==='R')};
@@ -53,7 +57,7 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     const passed=ease(clamp((browsePosition-item.measured.centerPx[1]-pitch*.4)/(pitch*3),0,1))*browseMix*(1-focus);
     const quaternion=item.baseQuaternion.clone().slerp(standing,focus);
     quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-.32*passed));
-    const foot=new THREE.Vector3(.716,0,0).multiply(item.modelScale);
+    const foot=footprint.foot.clone().multiply(item.modelScale);
     const position=item.basePosition.clone()
       .add(foot.clone().applyQuaternion(item.baseQuaternion))
       .sub(foot.applyQuaternion(quaternion));
@@ -66,40 +70,46 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     item.matrix.compose(item.position,item.quaternion,new THREE.Vector3().setScalar(item.uniformScale));
   }
   items.forEach(browsePose);
-  // Each stored blank is an instance of the original GLB meshes. Picking one
-  // promotes exactly those meshes, at exactly the same matrix, for articulation.
+  // Every slot owns its hierarchy, mixer and tape textures. Closed blank bodies
+  // share instanced geometry; picking reveals that slot's original articulated
+  // hierarchy, with the same geometry and labels, at the exact current pose.
   const empty=items.filter(item=>item.tape.blank),batches=[];
+  const models=await Promise.all(items.map(item=>createCase(renderer,{...item.tape,paperColor:item.tape.blank?item.measured.paperColor:undefined})));
+  items.forEach((item,i)=>{
+    item.model=models[i];item.model.pack.scale.copy(item.modelScale);item.model.pack.position.copy(item.position);item.model.pack.quaternion.copy(item.quaternion);
+    if(item.tape.blank)item.model.setStored(true);
+    storage.add(item.model.pack);
+  });
   blank.pack.updateMatrixWorld(true);
-  blank.pack.traverse(source=>{
-    if(!source.isMesh||!source.visible)return;
-    const mesh=new THREE.InstancedMesh(source.geometry,source.material,empty.length);
-    mesh.name='Stored_'+source.name;mesh.userData.source=source;mesh.frustumCulled=false;
-    empty.forEach((item,i)=>{
-      item.instance=i;mesh.setMatrixAt(i,new THREE.Matrix4().multiplyMatrices(item.matrix,source.matrixWorld));
-      if(source.name.includes('Label'))mesh.setColorAt(i,item.color);
-    });
-    storage.add(mesh);batches.push(mesh);
-  });
-  for(const item of items.filter(item=>!item.tape.blank)){
-    item.model=await createCase(renderer,item.tape);item.model.pack.scale.copy(item.modelScale);item.model.pack.position.copy(item.position);item.model.pack.quaternion.copy(item.quaternion);storage.add(item.model.pack);
+  const groups=new Map();
+  for(const source of blank.bodyMeshes){
+    const geometry=(source.geometry.index?source.geometry.toNonIndexed():source.geometry.clone()).applyMatrix4(source.matrixWorld);
+    for(const name of Object.keys(geometry.attributes))if(!['position','normal','uv'].includes(name))geometry.deleteAttribute(name);
+    if(!geometry.attributes.uv)geometry.setAttribute('uv',new THREE.BufferAttribute(new Float32Array(geometry.attributes.position.count*2),2));
+    if(!groups.has(source.material))groups.set(source.material,[]);groups.get(source.material).push(geometry);
   }
-  // Trace the visible, bowed box outline too. No divider is visible in the photo.
-  const cardboard=new THREE.MeshStandardMaterial({color:0xaf895d,roughness:1});
-  const inner=new THREE.MeshStandardMaterial({color:0x9c794e,roughness:1});
-  const outline=layout.boxOutlinePx.map(([x,y])=>new THREE.Vector2((x-cx)*units,(y-cy)*units));
-  const shape=new THREE.Shape();outline.forEach((point,i)=>i?shape.lineTo(point.x,-point.y):shape.moveTo(point.x,-point.y));shape.closePath();
-  const floor=new THREE.Mesh(new THREE.ShapeGeometry(shape),inner);floor.rotation.x=-Math.PI/2;floor.position.y=-.015;storage.add(floor);
-  outline.forEach((point,i)=>{
-    const end=outline[(i+1)%outline.length],dx=end.x-point.x,dz=end.y-point.y;
-    const wall=new THREE.Mesh(new THREE.BoxGeometry(Math.hypot(dx,dz),1.5,.025),cardboard);
-    wall.position.set((point.x+end.x)/2,.74,(point.y+end.y)/2);wall.rotation.y=-Math.atan2(dz,dx);storage.add(wall);
-  });
+  for(const [sourceMaterial,geometries] of groups){
+    const geometry=mergeGeometries(geometries),material=sourceMaterial.clone();geometries.forEach(g=>g.dispose());
+    if(!geometry)throw Error('Could not batch the detailed CD geometry.');
+    if(material.thickness)material.thickness*=blank.normalizer;
+    const mesh=new THREE.InstancedMesh(geometry,material,empty.length);mesh.name='Stored_'+material.name;mesh.frustumCulled=false;
+    empty.forEach((item,i)=>{item.instance=i;item.stored=true;mesh.setMatrixAt(i,item.matrix);});storage.add(mesh);batches.push(mesh);
+  }
+  // Keep the photographed CD positions without the cardboard floor or walls.
   const backgroundMaterials=new Map();storage.traverse(o=>{if(o.material&&!backgroundMaterials.has(o.material))backgroundMaterials.set(o.material,{opacity:o.material.opacity,depthWrite:o.material.depthWrite,transparent:o.material.transparent});});
   // Compile both the instanced rack and ordinary mesh path before the first lift.
   const warm=blank.pack.clone(true);warm.visible=true;warm.position.set(0,-50,0);scene.add(warm);
   let active=null,state='box',motion=null,raf=0,detailDispose=null,backdropAlpha=1;
   let homeCamera=new THREE.Vector3(),homeQuaternion=new THREE.Quaternion();
-  function draw(){renderer.render(scene,camera);}
+  const frustum=new THREE.Frustum(),viewProjection=new THREE.Matrix4(),caseSphere=new THREE.Sphere();
+  function draw(){
+    if(storage.visible){
+      camera.updateMatrixWorld();frustum.setFromProjectionMatrix(viewProjection.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse));
+      const visible=empty.filter(item=>item.stored&&frustum.intersectsSphere(caseSphere.set(item.position,1.02*item.uniformScale)));
+      for(const mesh of batches){mesh.count=visible.length;visible.forEach((item,i)=>mesh.setMatrixAt(i,item.matrix));mesh.instanceMatrix.needsUpdate=true;}
+    }
+    renderer.render(scene,camera);
+  }
   function backdrop(alpha){
     backdropAlpha=alpha;storage.visible=alpha>0;
     const activeMaterials=new Set();active?.model.pack.traverse(o=>{if(o.material)activeMaterials.add(o.material);});
@@ -133,8 +143,8 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     if(!pointer){hoverIndex=null;return;}
     const pointerTargets=items.map(item=>{
       const pose=poseFor(item,0);
-      const edge=z=>screen(new THREE.Vector3(-.716,.052,z).multiply(item.modelScale).applyQuaternion(pose.quaternion).add(pose.position));
-      return {index:item.index,left:edge(-.625),right:edge(.625)};
+      const edge=point=>screen(point.clone().multiply(item.modelScale).applyQuaternion(pose.quaternion).add(pose.position));
+      return {index:item.index,left:edge(footprint.spineLeft),right:edge(footprint.spineRight)};
     });
     let closest=null,distance=Infinity;
     for(const point of pointerTargets){
@@ -151,9 +161,9 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   function targets(){
     const r=canvas.getBoundingClientRect();
     const points=items.map(item=>{
-      const center=screen(new THREE.Vector3(-.716,.052*thickness,0).applyMatrix4(item.matrix));
-      const left=screen(new THREE.Vector3(-.716,.052*thickness,-.625).applyMatrix4(item.matrix));
-      const right=screen(new THREE.Vector3(-.716,.052*thickness,.625).applyMatrix4(item.matrix));
+      const center=screen(footprint.spineCenter.clone().applyMatrix4(item.matrix));
+      const left=screen(footprint.spineLeft.clone().applyMatrix4(item.matrix));
+      const right=screen(footprint.spineRight.clone().applyMatrix4(item.matrix));
       return {index:item.index,x:center.x,y:center.y,width:Math.hypot(right.x-left.x,right.y-left.y),height:Math.max(14,r.height*spacing/(2*(camera.position.y-spineHeight)*Math.tan(THREE.MathUtils.degToRad(camera.fov/2)))*.7),angle:Math.atan2(right.y-left.y,right.x-left.x)*180/Math.PI,focused:focusedIndex()===item.index};
     });onLayout(points);
   }
@@ -167,7 +177,7 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
       if(Math.abs(target-item.focus)<.002)item.focus=target;else moving=true;
       browsePose(item);
       if(item.model){item.model.pack.position.copy(item.position);item.model.pack.quaternion.copy(item.quaternion);}
-      else setInstance(item,true);
+      if(item.tape.blank)setInstance(item,true);
     });
     canvas.dataset.browse=browsePosition.toFixed(3);
     canvas.dataset.focusedCase=String(focusedIndex());
@@ -268,25 +278,17 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
   const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
   if(renderer.compileAsync)await renderer.compileAsync(scene,camera);else renderer.compile(scene,camera);
   scene.remove(warm);
-  function setInstance(item,visible){
-    batches.forEach(mesh=>{mesh.setMatrixAt(item.instance,visible?new THREE.Matrix4().multiplyMatrices(item.matrix,mesh.userData.source.matrixWorld):new THREE.Matrix4().makeScale(0,0,0));mesh.instanceMatrix.needsUpdate=true;});
-  }
+  function setInstance(item,visible){item.stored=visible;}
   function promote(item){
-    if(!item.tape.blank)return item.model;
-    const pack=blank.pack.clone(true),materials=[];
-    pack.traverse(o=>{if(!o.isMesh)return;o.material=o.material.clone();materials.push(o.material);if(o.name.includes('Label'))o.material.color.multiply(item.color);});
-    pack.scale.copy(item.modelScale);pack.position.copy(item.position);pack.quaternion.copy(item.quaternion);
-    setInstance(item,false);
-    return {...blank,pack,hinge:pack.getObjectByName('Lid_Hinge'),tape:item.tape,dispose:()=>materials.forEach(m=>m.dispose())};
+    if(item.tape.blank){setInstance(item,false);item.model.setStored(false);}
+    return item.model;
   }
   function detailPose(){
     const pack=active.model.pack,oldP=pack.position.clone(),oldQ=pack.quaternion.clone();
     const endP=new THREE.Vector3(0,4,0),endQ=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,-.16,0));
     pack.position.copy(endP);pack.quaternion.copy(endQ);pack.updateMatrixWorld(true);
-    const sphere=new THREE.Box3().setFromObject(pack).getBoundingSphere(new THREE.Sphere());
-    const distance=sphere.radius/Math.sin(THREE.MathUtils.degToRad(camera.fov/2))*1.06/Math.min(1,camera.aspect);
-    const direction=new THREE.Vector3(...(active.tape.tracks?.length?[.3,4,1.5]:[.9,2.9,2.7])).normalize();
-    const endCamera=sphere.center.clone().addScaledVector(direction,distance),testCamera=camera.clone();testCamera.position.copy(endCamera);testCamera.up.set(0,1,0);testCamera.lookAt(sphere.center);
+    const frame=caseFrame(pack,camera,canvas,coverDirection());
+    const endCamera=frame.position,testCamera=camera.clone();testCamera.position.copy(endCamera);testCamera.up.set(0,1,0);testCamera.lookAt(frame.center);
     pack.position.copy(oldP);pack.quaternion.copy(oldQ);pack.updateMatrixWorld(true);
     return {endP,endQ,endCamera,endCameraQ:testCamera.quaternion.clone()};
   }
@@ -307,7 +309,7 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     // Stop the player immediately; the lid closes during the return movement.
     onReturn(false);setState('returning');
     const pack=active.model.pack;
-    motion={start:performance.now(),duration:950,fromP:pack.position.clone(),fromQ:pack.quaternion.clone(),fromCamera:camera.position.clone(),fromCameraQ:camera.quaternion.clone(),endP:active.position.clone(),endQ:active.quaternion.clone(),endCamera:homeCamera.clone(),endCameraQ:homeQuaternion.clone(),returning:true,fromAlpha:backdropAlpha,lid:active.model.hinge.rotation.z};
+    motion={start:performance.now(),duration:950,fromP:pack.position.clone(),fromQ:pack.quaternion.clone(),fromCamera:camera.position.clone(),fromCameraQ:camera.quaternion.clone(),endP:active.position.clone(),endQ:active.quaternion.clone(),endCamera:homeCamera.clone(),endCameraQ:homeQuaternion.clone(),returning:true,fromAlpha:backdropAlpha,lid:active.model.openProgress};
     cancelAnimationFrame(raf);tick(performance.now());
   }
   function tick(time){
@@ -317,7 +319,7 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
       const lift=ease(clamp((1-t)/.48,0,1)),travel=ease(clamp((1-t-.18)/.82,0,1));
       pack.position.lerpVectors(m.endP,m.fromP,travel);pack.position.y=m.endP.y+(m.fromP.y-m.endP.y)*lift;
       pack.quaternion.slerpQuaternions(m.fromQ,m.endQ,1-ease(clamp((1-t-.2)/.8,0,1)));
-      active.model.hinge.rotation.z=m.lid*(1-ease(clamp(t/.45,0,1)));
+      active.model.setOpenProgress(m.lid*(1-ease(clamp(t/.45,0,1))));
     }else{
       // Clear the neighbors first, then turn the cover toward the viewer.
       const lift=ease(clamp(t/.48,0,1)),travel=ease(clamp((t-.18)/.82,0,1));
@@ -333,9 +335,9 @@ export async function mountCollection(canvas,slots,{onPick,onReady,onReturn,onPr
     const m=motion;motion=null;cancelAnimationFrame(raf);
     active.model.pack.position.copy(m.endP);active.model.pack.quaternion.copy(m.endQ);camera.position.copy(m.endCamera);camera.quaternion.copy(m.endCameraQ);camera.updateMatrixWorld();
     if(m.returning){
-      active.model.hinge.rotation.z=0;
-      if(active.tape.blank){scene.remove(active.model.pack);setInstance(active,true);active.model.dispose();delete active.model;}
-      else storage.attach(active.model.pack);
+      active.model.setOpenProgress(0);
+      storage.attach(active.model.pack);
+      if(active.tape.blank){active.model.setStored(true);setInstance(active,true);}
       active=null;backdrop(1);setState('box');placeCamera();targets();onReturn(true);animateBrowse();
     }else{
       backdrop(0);setState('held');

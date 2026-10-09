@@ -1,110 +1,147 @@
 import * as THREE from 'three';
-import { GLTFLoader } from '../album/vendor/GLTFLoader.js';
-let modelPromise;
-export const loadModel=()=>modelPromise??=new GLTFLoader().loadAsync(new URL('../assets/mixtapes/burned-cd-jewel-case.glb',import.meta.url).href);
+import {GLTFLoader} from '../album/vendor/GLTFLoader.js';
+let modelPromise,fontPromise,handwritingPromise;
+const coverMaps=new Map();
+export const loadModel=()=>modelPromise??=new GLTFLoader().loadAsync(new URL('../assets/mixtapes/floral-cd-case.glb',import.meta.url).href);
 export async function createCase(renderer,tape){
   const gltf=await loadModel();
-  await document.fonts.load('20px "Selectric Mono"');
-  const coverMap=tape.cover?await new THREE.TextureLoader().loadAsync(new URL('../'+tape.cover,import.meta.url).href).catch(error=>{console.warn('Mixtape cover unavailable',error);return null;}):null;
-  const pack=gltf.scene.clone(true);
-  const materials=[],textures=[];
-  const tracks=tape.tracks||[],regions=[];
-  // A restrained diffraction tint makes the recording surface recognizable as CD-R.
-  const discCanvas=document.createElement('canvas');discCanvas.width=discCanvas.height=512;
-  const discContext=discCanvas.getContext('2d'),pixels=discContext.createImageData(512,512),tint=new THREE.Color();
-  for(let y=0;y<512;y++)for(let x=0;x<512;x++){
-    const dx=x-256,dy=y-256,r=Math.hypot(dx,dy)/256,a=Math.atan2(dy,dx);
-    const band=Math.pow(Math.abs(Math.sin(a+.3)),12)*.32;
-    const grain=Math.sin(r*2200)*.008;
-    tint.setHSL((a/Math.PI+1+r*.35)%1,.42,.67);
-    const i=(y*512+x)*4;
-    pixels.data[i]=Math.round(255*(.73*(1-band)+tint.r*band+grain));
-    pixels.data[i+1]=Math.round(255*(.74*(1-band)+tint.g*band+grain));
-    pixels.data[i+2]=Math.round(255*(.75*(1-band)+tint.b*band+grain));pixels.data[i+3]=255;
+  await (fontPromise??=document.fonts.load('20px "Selectric Mono"'));
+  if(tape.tracks?.length)await (handwritingPromise??=document.fonts.load('40px "Borel"'));
+  let coverMap=null;
+  if(tape.cover){
+    if(!coverMaps.has(tape.cover))coverMaps.set(tape.cover,new THREE.TextureLoader().loadAsync(new URL('../'+tape.cover,import.meta.url).href).then(map=>{map.colorSpace=THREE.SRGBColorSpace;map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return map;}));
+    coverMap=await coverMaps.get(tape.cover);
   }
-  discContext.putImageData(pixels,0,0);
-  const discMap=new THREE.CanvasTexture(discCanvas);discMap.colorSpace=THREE.SRGBColorSpace;textures.push(discMap);
-  function label(disc=false){
-    const c=document.createElement('canvas');c.width=1024;c.height=208;
-    const ctx=c.getContext('2d');
-    if(!disc){ctx.fillStyle='#ece4cf';ctx.fillRect(0,0,c.width,c.height);}
-    ctx.fillStyle='#344638';ctx.textAlign='center';ctx.font='38px "Selectric Mono", monospace';
-    ctx.fillText(disc?(tape.blank?'':'CD-R / WEEKLY MIX'):tape.title,512,65,920);
-    ctx.font='54px "Selectric Mono", monospace';ctx.fillText(tape.label,512,145,920);
-    const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;texture.flipY=false;texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());textures.push(texture);return texture;
-  }
-  let hinge;
-  pack.traverse(o=>{
-    if(o.name==='Lid_Hinge')hinge=o;
+  const source=gltf.scene.clone(true),pack=new THREE.Group();pack.name='Mixtape_Case';pack.add(source);
+  // glTF is already Y-up, face-up, with the spine at -Z. The reference's
+  // assembly X rotation only faces its front camera; this scene uses Y-up.
+  // Leave Album_Orientation (the authored 90-degree turn) untouched.
+  const rawBounds=new THREE.Box3().setFromObject(source),normalizer=1.25/(rawBounds.max.x-rawBounds.min.x);
+  source.scale.setScalar(normalizer);pack.updateMatrixWorld(true);
+  const materials=new Map(),textures=[],ownedGeometry=[],tapeMeshes={},bodyMeshes=[];
+  const intensity={'Floral printed lacquer':.3,'Clear molded acrylic':2.8,'Clear polycarbonate hub':1.8,'Molded edge facets':2.7,'Satin latch and tooling pads':1.5};
+  source.traverse(o=>{
     if(!o.isMesh)return;
-    let material=o.material.clone();
-    if(o.name==='CD_R'||o.name==='Recorded_Area'||o.name.startsWith('Recording_Ring')){
-      if(!o.geometry.getAttribute('uv')){
-        const positions=o.geometry.getAttribute('position'),uv=new Float32Array(positions.count*2);
-        for(let i=0;i<positions.count;i++){uv[i*2]=(positions.getX(i)-.045)/1.2+.5;uv[i*2+1]=.5-positions.getZ(i)/1.2;}
-        o.geometry.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+    if(!materials.has(o.material)){
+      const m=o.material.clone();m.envMapIntensity=intensity[m.name]??1.7;
+      if(m.name==='Clear thin cover'){
+        // Match the reference's thin-panel treatment, retaining physical glass
+        // on the edges, hinges, latch and hub in the single transmission pass.
+        m.transmission=0;m.transparent=true;m.opacity=.018;m.depthWrite=false;m.side=THREE.FrontSide;
       }
-      material.dispose();material=new THREE.MeshPhysicalMaterial({map:discMap,color:0xffffff,metalness:.78,roughness:.27,iridescence:.28,iridescenceIOR:1.45,iridescenceThicknessRange:[240,390],envMapIntensity:.9});
+      materials.set(o.material,m);
     }
-    if(o.name==='Case_Date_Label'||o.name==='Disc_Date_Label'){
-      material.dispose();material=new THREE.MeshBasicMaterial({map:label(o.name==='Disc_Date_Label'),transparent:o.name==='Disc_Date_Label',toneMapped:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1});
-    }
-    if(tracks.length&&o.name==='Disc_Date_Label')o.visible=false;
-    if(tracks.length&&o.name==='Lid_Glass')material.opacity=.045;
-    if(material.transparent){material.depthWrite=false;material.side=THREE.DoubleSide;}
-    o.material=material;materials.push(material);
+    o.material=materials.get(o.material);
+    if(o.userData.label_surface){tapeMeshes[o.userData.label_surface]=o;o.material.envMapIntensity=.25;}
+    else bodyMeshes.push(o);
   });
-  let printedDisc;
+  const hinge=source.getObjectByName('Lid_Pivot'),clip=gltf.animations.find(a=>a.name==='Open case');
+  if(!hinge||!clip||!tapeMeshes.cover||!tapeMeshes.spine)throw Error('The floral CD model is missing its hinge, Open case animation, or prepared tapes.');
+  const mixer=new THREE.AnimationMixer(source),action=mixer.clipAction(clip);action.setLoop(THREE.LoopOnce,1);action.clampWhenFinished=true;action.play();
+  let openProgress=0;
+  function setOpenProgress(value){
+    openProgress=THREE.MathUtils.clamp(value,0,1);action.enabled=true;action.paused=false;mixer.setTime(openProgress*clip.duration);pack.updateMatrixWorld(true);
+  }
+  setOpenProgress(0);
+  const title=String(tape.title||''),date=String(tape.label||'');
+  const labelCanvases={};
+  for(const [key,mesh] of Object.entries(tapeMeshes)){
+    const text=[title,date].filter(Boolean).join(' · '),canvas=document.createElement('canvas');
+    // Blank tapes still own independent textures; small maps avoid spending
+    // desktop-sized label memory on the 84 intentionally empty cases.
+    canvas.width=text?(key==='cover'?1536:2048):256;
+    canvas.height=text?(key==='cover'?240:128):(key==='cover'?40:16);
+    const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.flipY=false;texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+    textures.push(texture);mesh.material.map=texture;mesh.material.color.set(0xffffff);mesh.material.needsUpdate=true;
+    labelCanvases[key]={canvas,texture,mesh};
+  }
+  function setWriting({cover='',spine=''}={}){
+    for(const [key,{canvas,texture,mesh}] of Object.entries(labelCanvases)){
+      const text=String(key==='cover'?cover:spine),ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
+      ctx.fillStyle=tape.paperColor||'#ded3b8';ctx.fillRect(0,0,w,h);
+      let seed=619;for(let i=0;i<Math.min(2500,w*h/20);i++){seed=(seed*1664525+1013904223)>>>0;const x=seed%w;seed=(seed*1664525+1013904223)>>>0;ctx.fillStyle=i%2?'rgba(90,74,42,.035)':'rgba(255,255,244,.12)';ctx.fillRect(x,seed%h,1+i%3,1);}
+      let size=h*.57;ctx.font=`${size}px "Selectric Mono",monospace`;
+      while(ctx.measureText(text).width>w*.9&&size>12){size-=1;ctx.font=`${size}px "Selectric Mono",monospace`;}
+      ctx.fillStyle='#25291f';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,w/2,h*.52);
+      texture.needsUpdate=true;mesh.userData.writing=text;mesh.parent.userData.writing=text;
+    }
+  }
+  const writing=[title,date].filter(Boolean).join(' · ');setWriting({cover:writing,spine:writing});
+  // Replace the embedded floral print only for an album with supplied artwork.
+  // Re-map that print's UVs into the already-oriented case coordinates so the
+  // photo is upright; tape UVs and the authored 90-degree orientation stay intact.
+  if(coverMap){
+    const artwork=document.createElement('canvas');artwork.width=artwork.height=1024;
+    const ctx=artwork.getContext('2d'),img=coverMap.image,crop=Math.min(img.width,img.height);
+    ctx.fillStyle='#32241f';ctx.fillRect(0,0,1024,1024);
+    ctx.drawImage(img,(img.width-crop)/2,(img.height-crop)*.55,crop,crop,0,0,1024,1024);
+    ctx.fillStyle='rgba(18,12,10,.16)';ctx.fillRect(0,0,1024,1024);
+    const shade=ctx.createLinearGradient(0,0,1024,0);
+    for(const [stop,alpha] of [[0,.4],[.27,.28],[.42,0],[.58,0],[.73,.28],[1,.4]])shade.addColorStop(stop,`rgba(18,12,10,${alpha})`);
+    ctx.fillStyle=shade;ctx.fillRect(0,0,1024,1024);
+    const map=new THREE.CanvasTexture(artwork);map.colorSpace=THREE.SRGBColorSpace;map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());map.userData.coverUrl=tape.cover;textures.push(map);
+    const face=source.getObjectByName('Printed_floral_face'),geometry=face.geometry.clone();ownedGeometry.push(geometry);
+    const positions=geometry.attributes.position,uv=new Float32Array(positions.count*2),diameter=.117*normalizer;
+    for(let i=0;i<positions.count;i++){
+      const point=pack.worldToLocal(face.localToWorld(new THREE.Vector3().fromBufferAttribute(positions,i)));
+      uv[i*2]=point.x/diameter+.5;uv[i*2+1]=.5-point.z/diameter;
+    }
+    geometry.setAttribute('uv',new THREE.BufferAttribute(uv,2));face.geometry=geometry;face.material.map=map;face.material.needsUpdate=true;
+  }
+  const regions=[],tracks=tape.tracks||[];
+  let printedDisc,coverPrint;
   if(tracks.length){
     const c=document.createElement('canvas');c.width=c.height=1024;const ctx=c.getContext('2d');
-    ctx.fillStyle='#26362f';ctx.textAlign='center';ctx.font='48px "Selectric Mono",monospace';ctx.fillText(tape.title,512,211,660);
+    // White ink sits directly over the photo. A narrow dark stroke/shadow
+    // separates the handwriting from bright skin, paper and glass highlights.
+    if(!coverMap){ctx.fillStyle='#343a32';ctx.beginPath();ctx.arc(512,512,494,0,Math.PI*2);ctx.arc(512,512,186,0,Math.PI*2,true);ctx.fill();}
+    ctx.lineJoin='round';ctx.strokeStyle='rgba(18,12,10,.9)';ctx.lineWidth=2.6;ctx.shadowColor='rgba(10,8,6,.85)';ctx.shadowBlur=3;ctx.shadowOffsetY=1;
+    function ink(text,x,y,width){ctx.strokeText(text,x,y,width);ctx.fillText(text,x,y,width);}
+    ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='39px "Selectric Mono",monospace';ink(title,512,190,660);
     const total=Math.floor(tracks.reduce((sum,t)=>sum+t.durationMs,0)/1000);
-    ctx.font='21px "Selectric Mono",monospace';ctx.fillText(`${tracks.length} TRACKS / ${Math.floor(total/60)}:${String(total%60).padStart(2,'0')} / SPOTIFY`,512,255,650);
-    function lines(text,x,y,width,font,maxLines=2){
-      ctx.font=font;const words=text.split(/\s+/);let line='',count=0;
-      for(const word of words){const next=line?line+' '+word:word;if(ctx.measureText(next).width>width&&line&&count<maxLines-1){ctx.fillText(line,x,y,width);line=word;y+=29;count++;}else line=next;}
-      ctx.fillText(line,x,y,width);return y;
+    ctx.font='20px "Selectric Mono",monospace';ink(`${tracks.length} TRACKS / ${Math.floor(total/60)}:${String(total%60).padStart(2,'0')} / SPOTIFY`,512,230,650);
+    function lines(text,x,y,width,step){
+      const words=text.split(/\s+/);let size=40,wrapped=[];
+      for(;size>=24;size--){
+        ctx.font=`${size}px "Borel",cursive`;wrapped=[];let line='';
+        for(const word of words){const next=line?line+' '+word:word;if(ctx.measureText(next).width>width&&line){wrapped.push(line);line=word;}else line=next;}
+        wrapped.push(line);
+        if(wrapped.length<=3&&(wrapped.length-1)*size*1.6<=step-100)break;
+      }
+      const lineHeight=size*1.6;
+      wrapped.forEach((line,index)=>ink(line,x,y+index*lineHeight,width));
+      return {end:y+(wrapped.length-1)*lineHeight,size,lines:wrapped};
     }
-    const rows=Math.ceil(tracks.length/2),step=Math.min(132,400/rows);
+    const rows=Math.ceil(tracks.length/2),step=Math.min(200,600/rows);
     tracks.forEach((track,index)=>{
-      const col=index<rows?0:1,row=index%rows,x=col?606:182,y=350+row*step,w=244;
-      ctx.textAlign='left';ctx.fillStyle='#596256';ctx.font='19px "Selectric Mono",monospace';ctx.fillText(String(index+1).padStart(2,'0'),x,y);
-      ctx.fillStyle='#26362f';const end=lines(track.title,x,y+29,w,'28px "Selectric Mono",monospace');
-      ctx.fillStyle='#515c50';ctx.font='19px "Selectric Mono",monospace';ctx.fillText(track.artist,x,end+27,w);
-      regions.push({x:x-10,y:y-20,w:w+20,h:step,track});
+      const col=index<rows?0:1,row=index%rows,x=col?704:128,y=280+row*step,w=192;
+      ctx.textAlign='left';ctx.fillStyle='#eee9df';ctx.font='19px "Selectric Mono",monospace';ink(String(index+1).padStart(2,'0'),x,y,w);
+      ctx.fillStyle='#fff';const titleLayout=lines(track.title,x,y+45,w,step);
+      ctx.fillStyle='#eee9df';ctx.font='18px "Selectric Mono",monospace';ink(track.artist,x,titleLayout.end+26,w);
+      regions.push({x:x-8,y:y-20,w:w+16,h:step,track,titleLayout});
     });
-    ctx.textAlign='center';ctx.fillStyle='#596256';ctx.font='19px "Selectric Mono",monospace';ctx.fillText('SELECT A TRACK · PRESS PLAY',512,826,590);
+    ctx.textAlign='center';ctx.fillStyle='#eee9df';ctx.font='19px "Selectric Mono",monospace';ink('SELECT A TRACK · PRESS PLAY',512,866,590);
     const map=new THREE.CanvasTexture(c);map.colorSpace=THREE.SRGBColorSpace;map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());textures.push(map);
-    const material=new THREE.MeshBasicMaterial({map,transparent:true,depthWrite:false,toneMapped:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2});materials.push(material);
-    printedDisc=new THREE.Mesh(new THREE.PlaneGeometry(1.2,1.2),material);printedDisc.name='Printed_Tracklist';printedDisc.rotation.x=-Math.PI/2;printedDisc.position.set(.045,.087,0);pack.add(printedDisc);
+    const material=new THREE.MeshBasicMaterial({map,transparent:true,depthWrite:false,toneMapped:false,side:THREE.DoubleSide});materials.set(material,material);
+    const diameter=.117*normalizer,geometry=new THREE.PlaneGeometry(diameter,diameter);ownedGeometry.push(geometry);
+    printedDisc=new THREE.Mesh(geometry,material);printedDisc.name='Printed_Tracklist';printedDisc.userData.lettering={font:'Borel',color:'#ffffff',backing:coverMap?'album photo':'dark disc'};printedDisc.rotation.x=-Math.PI/2;printedDisc.position.y=.00232*normalizer;pack.add(printedDisc);
   }
-  if(!hinge)throw Error('Case hinge missing');
-  // Separate front-facing spine strip and outer-edge labels, fixed to the base.
-  const spineCanvas=document.createElement('canvas');spineCanvas.width=1536;spineCanvas.height=112;
-  const spineContext=spineCanvas.getContext('2d');
-  spineContext.fillStyle='#ece4cf';spineContext.fillRect(0,0,1536,112);
-  spineContext.fillStyle='#344638';spineContext.textBaseline='middle';spineContext.font='54px "Selectric Mono",monospace';
-  spineContext.fillText(tape.title,42,57,880);
-  spineContext.textAlign='right';spineContext.font='40px "Selectric Mono",monospace';spineContext.fillText(tape.label,1494,57,480);
-  const spineMap=new THREE.CanvasTexture(spineCanvas);spineMap.colorSpace=THREE.SRGBColorSpace;spineMap.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());textures.push(spineMap);
-  const spineMaterial=new THREE.MeshBasicMaterial({map:spineMap,toneMapped:false,side:THREE.FrontSide});materials.push(spineMaterial);
-  const spineLabels=[];
-  for(const [name,width,height,position,rotation] of [
-    ['Spine_Top_Label',1.12,.078,[-.654,.089,0],[-Math.PI/2,0,Math.PI/2]],
-    ['Spine_Left_Label',1.1,.064,[-.716,.052,0],[0,-Math.PI/2,0]],
-    ['Spine_Right_Label',1.1,.064,[.716,.052,0],[0,Math.PI/2,0]],
-  ]){const mesh=new THREE.Mesh(new THREE.PlaneGeometry(width,height),spineMaterial);mesh.name=name;mesh.position.set(...position);mesh.rotation.set(...rotation);mesh.userData.label=`${tape.title} · ${tape.label}`;pack.add(mesh);spineLabels.push(mesh);}
-  let coverPrint;
-  if(coverMap){
-    coverMap.colorSpace=THREE.SRGBColorSpace;coverMap.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());textures.push(coverMap);
-    const material=new THREE.MeshBasicMaterial({map:coverMap,alphaTest:.35,side:THREE.DoubleSide,toneMapped:false});materials.push(material);
-    const height=.98,width=height*coverMap.image.width/coverMap.image.height;
-    coverPrint=new THREE.Mesh(new THREE.PlaneGeometry(width,height),material);coverPrint.name='Torn_Photo_Cover';
-    coverPrint.rotation.set(-Math.PI/2,0,-.025);coverPrint.position.set(.045,.124,-.075);pack.add(coverPrint);
+  if(coverMap&&tape.showCoverPhoto!==false){
+    const map=coverMap;
+    const material=new THREE.MeshBasicMaterial({map,alphaTest:.35,side:THREE.DoubleSide,toneMapped:false});materials.set(material,material);
+    const height=.075*normalizer,width=height*map.image.width/map.image.height,geometry=new THREE.PlaneGeometry(width,height);ownedGeometry.push(geometry);
+    coverPrint=new THREE.Mesh(geometry,material);coverPrint.name='Torn_Photo_Cover';coverPrint.rotation.x=-Math.PI/2;coverPrint.position.set(0,.00665*normalizer,.015*normalizer);pack.add(coverPrint);
     pack.updateMatrixWorld(true);hinge.attach(coverPrint);
   }
-  return {pack,hinge,regions,printedDisc,coverPrint,tape,dispose(){
-    printedDisc?.geometry.dispose();coverPrint?.geometry.dispose();spineLabels.forEach(mesh=>mesh.geometry.dispose());
-    materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());
-  }};
+  pack.updateMatrixWorld(true);
+  const bounds=new THREE.Box3().setFromObject(pack),spineCenter=pack.worldToLocal(tapeMeshes.spine.getWorldPosition(new THREE.Vector3()));
+  const footprint={spineCenter,spineLeft:new THREE.Vector3(bounds.min.x,spineCenter.y,spineCenter.z),spineRight:new THREE.Vector3(bounds.max.x,spineCenter.y,spineCenter.z),foot:new THREE.Vector3(0,0,bounds.max.z),width:bounds.max.x-bounds.min.x};
+  function trackPoint(region,center=false){
+    const width=printedDisc.geometry.parameters.width;
+    return printedDisc.localToWorld(new THREE.Vector3(((region.x+(center?region.w/2:70))/1024-.5)*width,(.5-(region.y+(center?47:50))/1024)*width,0));
+  }
+  return {pack,source,hinge,clip,mixer,tapeMeshes,bodyMeshes,normalizer,footprint,regions,printedDisc,coverPrint,tape,trackPoint,setWriting,setOpenProgress,
+    get openProgress(){return openProgress;},setStored(stored){bodyMeshes.forEach(mesh=>mesh.visible=!stored);},
+    dispose(){mixer.stopAllAction();mixer.uncacheRoot(source);ownedGeometry.forEach(g=>g.dispose());new Set(materials.values()).forEach(m=>m.dispose());textures.forEach(t=>t.dispose());}
+  };
 }

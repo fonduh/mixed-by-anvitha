@@ -9,6 +9,7 @@
       "url": "https://open.spotify.com/playlist/6VWaYZbC9La3vbG2qIywXq",
       "embed": true,
       "cover": "assets/mixtapes/cover-8077-torn.png",
+      "showCoverPhoto": false,
       "tracks": [
         {
           "title": "Little Bit",
@@ -58,6 +59,74 @@
         "retrievedAt": "2026-10-04T07:27:22.230167+00:00",
         "coverage": "Tracks exposed by the public Spotify embed; not an authenticated full-library sync",
         "count": 6
+      }
+    },
+    {
+      "title": "New songs for fonda",
+      "displayTitle": "Mixed by Vidya",
+      "date": null,
+      "dateLabel": "",
+      "draft": false,
+      "url": "https://open.spotify.com/playlist/0XRiCc89XG90yQUJduIrte",
+      "embed": true,
+      "cover": "assets/mixtapes/cover-vidya-6831.jpg",
+      "showCoverPhoto": false,
+      "tracks": [
+        {
+          "title": "No Ordinary Love",
+          "artist": "Sade",
+          "uri": "spotify:track:1oaaSrDJimABpOdCEbw2DJ",
+          "durationMs": 440466,
+          "explicit": false
+        },
+        {
+          "title": "Just like Heaven",
+          "artist": "The Cure",
+          "uri": "spotify:track:76GlO5H5RT6g7y0gev86Nk",
+          "durationMs": 212000,
+          "explicit": false
+        },
+        {
+          "title": "Excavator",
+          "artist": "Don Toliver",
+          "uri": "spotify:track:2A5cwtDZpk7RvsPolrF4UL",
+          "durationMs": 211106,
+          "explicit": true
+        },
+        {
+          "title": "Swim Good",
+          "artist": "Frank Ocean",
+          "uri": "spotify:track:3CgZCQyuyxHRMWB9BTwmni",
+          "durationMs": 257186,
+          "explicit": false
+        },
+        {
+          "title": "Soak Up The Sun - Surf Mesa Remix",
+          "artist": "Sheryl Crow, Surf Mesa",
+          "uri": "spotify:track:2DQ8UFOsJ9bWIyvcgZIhbl",
+          "durationMs": 207772,
+          "explicit": false
+        },
+        {
+          "title": "Snow in Skyami",
+          "artist": "Future",
+          "uri": "spotify:track:2nGzxt4Ww10tUoyDdkNqWq",
+          "durationMs": 162466,
+          "explicit": true
+        },
+        {
+          "title": "A Couple Minutes",
+          "artist": "Olivia Dean",
+          "uri": "spotify:track:312z6PZ8wwREck8613PkJk",
+          "durationMs": 212000,
+          "explicit": false
+        }
+      ],
+      "trackSource": {
+        "url": "https://open.spotify.com/embed/playlist/0XRiCc89XG90yQUJduIrte",
+        "retrievedAt": "2026-10-09T16:10:23.734799+00:00",
+        "coverage": "Tracks exposed by the public Spotify embed; not an authenticated full-library sync",
+        "count": 7
       }
     }
   ]

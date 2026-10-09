@@ -17,6 +17,7 @@ main,.collection{width:100%;height:100%;max-width:none;margin:0;padding:0}
 .case-is-out #collection-canvas{cursor:grab}.case-is-out #collection-canvas:active{cursor:grabbing}
 #spotify-panel{position:fixed;z-index:4;top:auto;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(420px,96%)}
 #load-fallback,noscript{position:absolute;inset:40% 16px auto;text-align:center}
+.mixtape-player-status{margin:0 3px 8px;font:12px/1.5 'Selectric Mono',monospace;color:#465044}
 [hidden]{display:none!important}
 @media(max-width:600px){
  #case-controls .mixtape-zoom-controls{gap:7px}.mixtape-actions{gap:10px}
